@@ -79,7 +79,9 @@ function created(session: TabSession) {
         t('workspace.profileFilter')
       }}</NTag>
     </div>
-    <RequestError v-if="error" :error="error" />
+    <RequestError v-if="error" :error="error">
+      <NButton v-if="embedded" :loading="loading" @click="refresh">{{ t('common.retry') }}</NButton>
+    </RequestError>
     <LiveUpdateStatus
       v-if="!embedded"
       :state="liveState"
