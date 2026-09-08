@@ -227,6 +227,6 @@
 
 ## 使用体验优化
 
-- [ ] Profile 必填启动地址、紧凑操作菜单与维护网址预填的真实页面验证
-- [ ] Portal 沉浸模式联动与真实 Session 媒体输入验证
-- [ ] Worker Maple Mono CN 默认字体与中文渲染的正式镜像验证
+- [x] Profile 必填启动地址、紧凑操作菜单与维护网址预填的真实页面验证
+- [x] Portal 沉浸模式联动与真实 Session 媒体输入验证
+- [x] Worker Maple Mono CN 默认字体与中文渲染的正式镜像验证

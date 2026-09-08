@@ -1055,3 +1055,48 @@ Worker 凭据/容量、Proxy、策略和 Session/Viewer/下载。各域沿用历
 临时诊断账户已软删除/撤销登录，临时角色及 201 条审计夹具删除，真实业务审计按保留策略保留。
 两个 Worker 就绪、活动 Tab 为 0、磁盘 OK。本机 Chrome、目标容器、端口转发及额外环境副本清理；
 候选六组件与原卷保留。相关类型检查、构建和定向 lint 通过，未创建 commit。
+
+### Profile 操作与默认字体（2026-09-08）
+
+BrowShare `fc21903` 与 Remote Tab `c7d0033` 的干净公开源码构建 Backend、Portal 和 Worker
+候选镜像，经 OCI 校验、SBOM 和来源记录验证后部署到六组件测试环境，保留原数据库、Worker
+身份和 Profile 数据卷。真实 Chrome 页面验证 Profile 操作列仅保留当前可用的启动或停止及
+更多菜单，键盘可打开更多并进入编辑；启动、停止确认及状态更新均经过真实 API/Worker。
+创建表单与实际编辑页的空启动地址均有明确必填提示，不能提交；合法 HTTPS 地址沿既有校验。
+维护弹窗首次从 Profile 启动地址预填，用户修改或清空后刷新状态不会覆盖输入；实际进入维护
+建立 Session。API 仍支持预配置空地址，未改变数据库可空契约。
+
+Worker 正式镜像内 Fontconfig 默认族为 Maple Mono CN，实际 Profile 的标准、衬线、无衬线、
+等宽四类字体在通用、简体、繁体脚本的十二项 Chrome 偏好均正确。真实 WebRTC 页面已解码
+中文和动画，输入在目标页面收到。Remote Tab 完整 Chrome Node 镜像另验证四类默认字体、
+粗斜体、网页显式字体优先和同 Profile 重启数据保留，详见相邻仓库测试文档。
+
+证据位于忽略的 `tmp/profile-viewer-ux/` 与 `tmp/maple-font-qa/`。本轮编辑、维护弹窗的 axe
+检查无 violation，保留人工确认项；这不代表对全部 Portal 页面的无障碍认证。字体安装固定
+Maple Mono CN v7.9，上游 OFL 随镜像提供，不替换网页显式指定的字体。
+
+### Viewer 沉浸交互与信令保活（2026-09-08）
+
+实际维护 Session 验证新的 24px SVG 图标、44px 操作按钮，以及沉浸模式收起 Portal 页眉、
+地址工具栏和窗口切换栏；浮动退出按钮支持键盘聚焦与 Enter，恢复原控制界面。远端网页自身
+不改写。主窗口与附属窗口切换、退出后选中窗口保留，普通和沉浸模式的输入均到达真实目标页。
+1440×1000 桌面、390×844 竖屏及 844×390 横屏在远端 viewport 确认后无页面溢出；编码帧宽度
+不作为 viewport 宽度断言。英文、中文标签均检查。沉浸页限定 WCAG 2/2.1 A/AA 的 axe 检查
+无 violation，保留两项人工确认；完整规则集另报告现有页面缺少 h1 的 best-practice 提示，
+不宣称全站无障碍认证。
+
+持续观察发现旧 Gateway 在约 75 秒闲置后触发真实 Viewer `ICE_FAILED` 重连并增加 Backend
+代次。Remote `5923c76596213e7a83ab92cca2f382ac64be30cb` 补齐原生 WebSocket ping/pong，
+独立真实 Nginx 验证见相邻仓库测试文档。随后使用 BrowShare `fc21903` 与该 Remote 干净公开
+提交通过正式候选工具构建 Gateway OCI，校验 SBOM、来源记录与产物，只替换测试站 Gateway
+镜像。六组件就绪，原数据卷和配置保留，该 Remote 提交的托管 CI 通过。
+
+修复后同一真实 Session 的 Viewer 连续观察 247.625 秒，解码帧从 415 增至 7469，Viewer
+元素、video 元素及媒体轨道保持相同，无 error 或重连状态事件，期间完成沉浸进入、退出和
+手机尺寸切换。Backend 管理 API 两次观察间隔 238.509 秒，Viewer generation 始终为 1，
+connectedAt 不变；等待后真实远端仍收到新的输入。这是本轮实际部署链路验收，没有重跑
+此前四浏览器/TURN 完整矩阵。
+
+证据保留在 `tmp/profile-viewer-ux/keepalive/`。两个本轮自有 Profile 和维护 Session 均通过
+API 完成关闭及删除，实际 Profile 目录消失，目标监听、隔离代理、构建器及本机测试浏览器
+已清理。测试站仅保留六个业务容器，用户原有 `test` Profile 仍为 RUNNING。
