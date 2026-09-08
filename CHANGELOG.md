@@ -2,9 +2,8 @@
 
 ## 0.1.0 — Unreleased candidate
 
-First coordinated BrowShare candidate. There is no published release or supported previous release
-yet. The current checkout has no committed release identity; this entry must not be interpreted as
-an available public download.
+First coordinated BrowShare candidate. Source commits and CI candidates are publicly available;
+there is no tagged release or supported previous release yet.
 
 ### Product
 
@@ -22,6 +21,8 @@ an available public download.
 
 - All-in-one and distributed Compose, explicit PostgreSQL migrations, TLS/CA helpers, environment
   examples, Profile archives and database backup/restore/retention tools.
+- Container configuration and healthcheck copies set readable permissions explicitly, allowing
+  non-root services to start from source checkouts created with a restrictive umask.
 - Linux amd64; Node 24.12.0; Google Chrome Stable 152.0.7977.75; Remote Tab and signed Extension
   0.1.23; Worker Control protocol 1.22. Exact pins are in [compatibility.json](deploy/compatibility.json).
 - Database migration journal contains the candidate schema. Historical schema upgrades and current
@@ -32,7 +33,8 @@ an available public download.
 ### Release limits
 
 Real acceptance and its individual environment/version boundaries are recorded in
-[testing and acceptance](docs/design/09-testing-and-acceptance.md). Local full checks, source archives,
-SBOMs and unsigned build records are separate from a hosted CI run, signed publisher identity, public
-source/registry release and an independent third-party empty-host exercise. Those external release
-conditions remain pending. See the [release guide](docs/RELEASING.md) before promoting this candidate.
+[testing and acceptance](docs/design/09-testing-and-acceptance.md). Public source, hosted CI, received
+candidate verification, isolated source installation and same-identity backup recovery have passed
+within their recorded scope. Registry publication and official Remote Tab signing remain pending;
+the source-install exercise was performed by the project Agent, not an independent external operator.
+See the [release guide](docs/RELEASING.md) before promoting this candidate.

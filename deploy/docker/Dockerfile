@@ -68,7 +68,7 @@ RUN apt-get update \
   && apt-get install --yes --no-install-recommends ca-certificates tini \
   && rm -rf /var/lib/apt/lists/*
 COPY --from=backend-build --chown=node:node /out/backend/ /app/
-COPY deploy/docker/healthcheck.mjs /app/healthcheck.mjs
+COPY --chmod=0644 deploy/docker/healthcheck.mjs /app/healthcheck.mjs
 USER node
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["node", "dist/cli.mjs"]
@@ -82,7 +82,7 @@ HEALTHCHECK NONE
 
 FROM nginx:1.27.5-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10 AS portal
 COPY --from=portal-build /source/apps/portal/dist/ /usr/share/nginx/html/
-COPY deploy/docker/nginx.conf /etc/nginx/nginx.conf
+COPY --chmod=0644 deploy/docker/nginx.conf /etc/nginx/nginx.conf
 USER nginx
 ENTRYPOINT ["nginx"]
 CMD ["-g", "daemon off;"]
@@ -97,7 +97,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 COPY --from=gateway-build --chown=node:node /out/gateway/ /app/
 COPY --from=signaling-build --chown=node:node /out/signaling/ /opt/browshare/signaling/
-COPY deploy/docker/healthcheck.mjs /app/healthcheck.mjs
+COPY --chmod=0644 deploy/docker/healthcheck.mjs /app/healthcheck.mjs
 RUN ln -s /opt/browshare/signaling /app/node_modules/@browshare/remote-tab-signaling \
   && ln -s /opt/browshare/signaling/node_modules/@browshare/remote-tab-protocol /app/node_modules/@browshare/remote-tab-protocol
 USER node
@@ -162,7 +162,7 @@ RUN install -d -o root -g root -m 0755 \
 
 COPY --from=build --chown=node:node /out/worker/ /app/
 COPY --chmod=755 tools/profile-archive.sh /app/tools/profile-archive.sh
-COPY deploy/docker/healthcheck.mjs /app/healthcheck.mjs
+COPY --chmod=0644 deploy/docker/healthcheck.mjs /app/healthcheck.mjs
 COPY --from=remote-tab-build --chown=node:node /out/remote-tab-core/ /opt/browshare/remote-tab-core/
 RUN ln -s /opt/browshare/remote-tab-core /app/node_modules/@browshare/remote-tab-core \
   && ln -s /opt/browshare/remote-tab-core/node_modules/@browshare/remote-tab-protocol /app/node_modules/@browshare/remote-tab-protocol
