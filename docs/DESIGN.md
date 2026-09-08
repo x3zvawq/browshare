@@ -154,6 +154,12 @@ BrowShare的界面应当像一套可信、克制的基础设施控制台，而�
 
 产品图标的蓝色是主要识别色。页面使用浅中性色提供稳定背景，品牌色只用于主动作、选中状态和关键连接信息。高风险操作使用明确的危险色和二次确认，不依靠低对比度装饰表达重要状态。
 
+## Brand assets
+
+品牌图标使用透明背景 SVG，标准源文件为 [`assets/browshare-icon.svg`](assets/browshare-icon.svg)，Portal 的 `public/browshare-icon.svg` 保持相同内容。README、登录页、导航、介绍页和 favicon 使用同一图形。
+
+BrowShare 与 Remote Tab 共用蓝色窗口、圆角和三色窗口按钮：BrowShare 以叠放窗口与共享节点表示工作区；Remote Tab 以指针与珊瑚色信号表示远程交互。图标不含位图、字体或外部资源，保持画布透明，在浅色与深色表面上都清晰可辨。
+
 ## Colors
 
 - 品牌蓝用于主按钮、活动导航、链接和连接正常的重点信息，不铺满大面积管理页面。

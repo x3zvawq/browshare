@@ -165,7 +165,7 @@ function logoutFromDrawer(): void {
   <div class="app-shell">
     <aside class="sidebar">
       <RouterLink class="brand" to="/account/security">
-        <img class="brand-mark" src="/browshare-icon.png" alt="" />
+        <img class="brand-mark" src="/browshare-icon.svg" alt="" />
         <span>BrowShare</span>
       </RouterLink>
 
@@ -301,7 +301,6 @@ function logoutFromDrawer(): void {
 .brand-mark {
   width: 36px;
   height: 36px;
-  border-radius: 9px;
 }
 
 .navigation {

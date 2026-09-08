@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" role="img" aria-labelledby="title">
+  <title id="title">BrowShare</title>
+  <defs>
+    <linearGradient id="blue" x1="32" y1="76" x2="204" y2="224" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#168BFF"/>
+      <stop offset="1" stop-color="#0F62D6"/>
+    </linearGradient>
+  </defs>
+  <rect x="76" y="28" width="156" height="164" rx="28" fill="#DCEBFF" stroke="#87B9FA" stroke-width="6"/>
+  <path d="M79 70h150" stroke="#87B9FA" stroke-width="6"/>
+  <g fill="#87B9FA">
+    <circle cx="99" cy="49" r="5"/>
+    <circle cx="117" cy="49" r="5"/>
+    <circle cx="135" cy="49" r="5"/>
+  </g>
+  <rect x="24" y="72" width="176" height="156" rx="28" fill="#F8FBFF" stroke="url(#blue)" stroke-width="8"/>
+  <path d="M28 101a25 25 0 0 1 25-25h118a25 25 0 0 1 25 25v13H28Z" fill="url(#blue)"/>
+  <circle cx="48" cy="95" r="6" fill="#FF746C"/>
+  <circle cx="68" cy="95" r="6" fill="#FFD166"/>
+  <circle cx="88" cy="95" r="6" fill="#70DEA7"/>
+  <path d="m87 173 53-31m-53 31 53 31" stroke="url(#blue)" stroke-width="12" stroke-linecap="round"/>
+  <g fill="url(#blue)">
+    <circle cx="82" cy="173" r="17"/>
+    <circle cx="143" cy="139" r="17"/>
+    <circle cx="143" cy="207" r="17"/>
+  </g>
+</svg>

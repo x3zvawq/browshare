@@ -12,7 +12,7 @@ defineProps<{
   <main class="auth-page">
     <header class="auth-header">
       <RouterLink class="brand" to="/about" aria-label="BrowShare">
-        <img class="brand-mark" src="/browshare-icon.png" alt="" />
+        <img class="brand-mark" src="/browshare-icon.svg" alt="" />
         <span>BrowShare</span>
       </RouterLink>
       <PreferenceControls />
@@ -21,7 +21,7 @@ defineProps<{
     <section class="auth-stage">
       <div class="auth-context" aria-hidden="true">
         <div class="context-mark">
-          <img src="/browshare-icon.png" alt="" />
+          <img src="/browshare-icon.svg" alt="" />
         </div>
         <p class="context-kicker">REMOTE BROWSER WORKSPACE</p>
         <p class="context-title">BrowShare</p>
@@ -75,7 +75,6 @@ defineProps<{
 .brand-mark {
   width: 34px;
   height: 34px;
-  border-radius: 9px;
 }
 
 .auth-stage {
@@ -98,19 +97,11 @@ defineProps<{
   height: 92px;
   margin-bottom: 30px;
   place-items: center;
-  border: 1px solid rgb(15 98 214 / 22%);
-  border-radius: 24px;
-  background: rgb(255 255 255 / 48%);
-  box-shadow: 0 24px 60px rgb(15 98 214 / 14%);
-}
-
-:global(:root[data-theme='dark']) .context-mark {
-  background: rgb(21 28 44 / 64%);
 }
 
 .context-mark img {
-  width: 68px;
-  height: 68px;
+  width: 84px;
+  height: 84px;
 }
 
 .context-kicker,

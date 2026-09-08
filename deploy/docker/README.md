@@ -7,26 +7,26 @@ Backend 与 migrator 使用同一生产依赖及 SQL migration 集合；Portal �
 通过 Nginx 提供静态页面、SPA 路由、REST、SSE 和 WSS。运行时配置与 Secret 不进入镜像。
 
 以下源码安装路径要求 Linux amd64、Git、Docker Engine/Compose v2/Buildx、Node.js 24、pnpm 10.28.2 与 OpenSSL。
-当前公开源码候选使用以下经过托管 CI 验证的固定配对，不能只凭两仓库的相同版本号混用源码：
+以下源码安装使用经过托管 CI 验证的固定配对，不能只凭两仓库的相同版本号混用源码：
 
 | 仓库 | 固定提交 | 托管验证 |
 | --- | --- | --- |
-| BrowShare | `ce48677cfbf7d9a31ec25ceb551fa8fbcf523619` | [CI](https://github.com/x3zvawq/browshare/actions/runs/34208798519) |
-| Remote Tab | `c4457f08580812349e68c31c741d010fdd5f0c82` | [CI](https://github.com/x3zvawq/browshare-remote-tab/actions/runs/34207712780) |
+| BrowShare | `5fa3c388d7e779a236cb70253b623c2b1175a300` | [CI](https://github.com/x3zvawq/browshare/actions/runs/34226779275) |
+| Remote Tab | `968a66092edff2de72f36055ec97a08c4b473f47` | [CI](https://github.com/x3zvawq/browshare-remote-tab/actions/runs/34225368970) |
 
 在新的工作目录获取公开源码；Remote Tab 的本地目录别名与 GitHub 仓库名不同，以下命令已显式指定：
 
 ```bash
 git clone https://github.com/x3zvawq/browshare.git browshare
 git clone https://github.com/x3zvawq/browshare-remote-tab.git browshare-tab-remote
-git -C browshare checkout --detach ce48677cfbf7d9a31ec25ceb551fa8fbcf523619
-git -C browshare-tab-remote checkout --detach c4457f08580812349e68c31c741d010fdd5f0c82
+git -C browshare checkout --detach 5fa3c388d7e779a236cb70253b623c2b1175a300
+git -C browshare-tab-remote checkout --detach 968a66092edff2de72f36055ec97a08c4b473f47
 cd browshare
 ```
 
 Remote Tab 默认位于相邻 `../browshare-tab-remote`，其他位置设置
 `BROWSHARE_REMOTE_TAB_SOURCE`。两仓库分别运行 `pnpm install --frozen-lockfile`；签名构建也需要 Remote Tab 的依赖。
-当前未发布的工作区不能用尚不存在的 Registry 镜像替代本地构建。
+本指南从源码构建镜像，后续 Compose 使用生成的本地镜像标签。
 小内存宿主应先按[受限构建器说明](../../docs/RELEASING.md#带-sbom-和来源记录的-oci-候选)
 限制构建并发与内存，并将构建和 Chrome 业务运行分时安排。
 本地构建入口使用 `docker buildx build --load`，将结果显式导入 Docker 镜像库，供后续 Compose
@@ -163,10 +163,10 @@ HTTPS 业务站点必须提供 Chrome 信任的证书；健康检查成功不等
 
 ## Worker image
 
-本目录定义BrowShare Worker的`linux/amd64`容器构建和Chrome sandbox配置。当前阶段的镜像包含
+本目录定义BrowShare Worker的`linux/amd64`容器构建和Chrome sandbox配置。镜像包含
 Worker应用、固定Google Chrome Stable及必要系统库。签名Extension作为部署者生成的只读release
 挂载提供，运行期Managed Policy由Worker生成。镜像从相邻Remote Tab源码构建并内置协调Core/Protocol及其
-生产依赖。业务完成度以[`PROGRESS.md`](../../PROGRESS.md)为准。
+生产依赖。节点能力与就绪状态可通过管理界面查看。
 
 ## 固定兼容集
 

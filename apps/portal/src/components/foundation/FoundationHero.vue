@@ -38,7 +38,7 @@ const { t } = useI18n()
     <div class="hero-orbit" aria-hidden="true">
       <div class="orbit-ring orbit-ring-outer"></div>
       <div class="orbit-ring orbit-ring-inner"></div>
-      <img class="hero-mark" src="/browshare-icon.png" alt="" />
+      <img class="hero-mark" src="/browshare-icon.svg" alt="" />
     </div>
   </section>
 </template>
