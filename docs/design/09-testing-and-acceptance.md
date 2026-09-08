@@ -500,6 +500,27 @@ verify`，限定实际仓库、CI workflow、完整 source SHA、main ref 且拒
 目录别名，使部署者无需访问维护者的 Repository Variables。证据在忽略的 `tmp/hosted-ci-qa/`
 与 Remote Tab 的同名目录；后续提交须核对自己的 CI 结果，不能继承首次提交的成功状态。
 
+### 五镜像托管构建与收到的制品验证（2026-09-08）
+
+[手动 OCI CI](https://github.com/x3zvawq/browshare/actions/runs/34209361177) 对 BrowShare
+`6899c317c7c3d1db5a104e853b648a9f8ef8480b` 与 Remote Tab
+`c4457f08580812349e68c31c741d010fdd5f0c82` 完成检查及五个 Linux amd64 镜像 job，六个
+job 均成功。下载后重新打开 backend、migrator、gateway、portal 四个实际 OCI 归档，通过
+正式镜像验证器重新计算 index、runtime manifest、config digest、SBOM 与来源记录，并与
+收到的 image record 比较一致。四份完整附件分别通过 release-artifacts 校验；配套源码
+附件的 12 个文件也通过校验，所有 source inputs 都指向上述 clean Git 提交。
+
+Worker job 成功构建实际 OCI，但工作流只上传其五份 JSON/checksum 事实文件；收到的这些
+文件通过校验，本轮没有下载、重新打开或导入该托管 Worker OCI。四份控制面 SBOM 的包数
+依次为 436、436、324、69，Worker 事实文件记录 262。镜像来源是未签名的 BuildKit
+SLSA provenance v1，不将它称为发布者身份认证。Remote Tab 同一托管运行的 chrome-node、
+signaling、standalone 三份容器 SBOM 及 checksum 也实际下载校验，分别包含 226、96、97
+个包；六个 npm 候选的 GitHub 签名验证结果另按上一节记录。
+
+证据在忽略的 `tmp/hosted-ci-qa/oci-6899c31-verification/` 与两仓库的同名 QA 目录。
+此项证明公开提交对应的托管构建和收到的候选内容，不代表 registry 发布，也不代替安装、
+媒体或备份恢复验收。
+
 ### 独立构建器的本地镜像导入（2026-09-08）
 
 公开安装准备发现三个本地构建入口使用未指定输出的 `docker build`，与文档的独立受限
@@ -511,6 +532,44 @@ context、平台、target 与 tag 参数。
 
 这是实际构建器与 Docker 本地镜像库的输出边界验证，不代替五类应用镜像构建或新安装业务
 验收。原失败与修复日志保存在忽略的 `tmp/public-source-install-qa/`；已有候选数据卷保留。
+
+### 公开源码隔离安装、候选替换和原身份恢复（2026-09-08）
+
+从公开 HTTPS 匿名获取 BrowShare `ce48677cfbf7d9a31ec25ceb551fa8fbcf523619` 与 Remote Tab
+`c4457f08580812349e68c31c741d010fdd5f0c82`，在新工作目录、新受限 builder、新配置和五个新卷
+中按正式入口完成五镜像构建及 `--load`。安装输入未使用维护者旧 QA helper、预构建应用
+镜像、CA、Worker 身份或 CRX；Extension 0.1.23 从公开源码以本组新密钥签名，并独立验证
+CRX 签名、ID 和摘要。新管理员、Enrollment、Worker、Profile 和导航规则通过公共接口创建，
+一次性 Enrollment 在首次上线后移除，Worker 以持久身份重新启动并完成对账。
+
+首次安装、候选替换和新卷恢复三个阶段都通过实际 Google Chrome Stable 的 Portal/Viewer、
+视频持续解码、鼠标/键盘输入，以及 64 字节浏览器原生下载领取。每次都独立核对 Backend
+`CLAIMED` 和对应 Worker directory/data/manifest 全部删除。合成业务站点仅在首次安装
+初始化普通测试 Cookie/localStorage；替换与恢复阶段只读原值，同时核对服务端实际收到
+Cookie。媒体实际使用本组 TURN/UDP relay；ICE policy 为 `all`，不称强制 TURN 或 TLS 验收。
+
+替换候选为匿名获取的公开文档提交 `6899c317c7c3d1db5a104e853b648a9f8ef8480b`，五镜像
+实际重建导入并重建容器。Portal image ID 相同，其余四个不同；Worker 身份、Credential、
+identity 文件摘要及 schema 23 保持一致。这是同 schema 的候选替换与数据保留，未据此
+声称跨 schema 或已有正式发行版本的升级。Session 关闭、Profile STOP、Worker DRAINING 后，
+Worker 与 Backend 在整个 Profile/identity/PostgreSQL 归档期间停止；同点部署配置、CA、
+Secret 和 CRX 一并归档。任何镜像切换、恢复或删除原项目/卷前，完整归档已复制本机，权限
+`0600`，整体摘要及各成员均验证通过。归档为 90,732,538 字节，SHA-256
+`185e3834777ce1de8a12cb4035145baaf9299ea3849a1d84db7575028a9172bf`。
+
+另一 Compose 项目以全新五卷通过正式恢复脚本恢复原 Worker/Credential/identity 摘要，
+没有重新 Enrollment；旧实例保持停止。恢复后的真实 Viewer 再次通过上述持久数据、媒体、
+输入和原生领取。最终通过公共生命周期删除测试 Profile，接口返回 404，Session 全部终态，
+Session 路径、Chrome spool 与 retained downloads 为空，Worker 无 Chrome/display 进程。
+本组旧安装项目和卷已移除；保留恢复后的候选和最新私密配置归档，交接时六服务运行、五个
+健康检查 healthy、Worker ONLINE/controlReady、activeTabs 0。本机浏览器、目标服务、
+受限 builder 和自有端口转发均已关闭。
+
+本组在既有 Ubuntu 测试主机上由项目 Agent 执行，证明公开输入足以完成隔离空项目安装和
+恢复；不声称重新安装操作系统或由独立外部真人操作。Portal 浏览器仅对本组指定 leaf
+使用 SPKI 例外，业务站点为 HTTP，TURN 证书为开发 CA；不声称公网 HTTPS 业务站点或
+浏览器 TURN/TLS 已由本组证明。进度项改为上述实际范围后勾选。全部证据、原始失败与 helper
+修正、归档及资源交接保存在忽略的 `tmp/public-source-install-qa/`；私密材料不得公开。
 
 ## 可观测性端点与启动日志实测（2026-09-07）
 
