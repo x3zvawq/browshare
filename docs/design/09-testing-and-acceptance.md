@@ -500,6 +500,15 @@ verify`，限定实际仓库、CI workflow、完整 source SHA、main ref 且拒
 目录别名，使部署者无需访问维护者的 Repository Variables。证据在忽略的 `tmp/hosted-ci-qa/`
 与 Remote Tab 的同名目录；后续提交须核对自己的 CI 结果，不能继承首次提交的成功状态。
 
+### 当前媒体客户端的配对源码 CI（2026-09-08）
+
+后续 [配对源码 CI](https://github.com/x3zvawq/browshare/actions/runs/34225880615) 对 BrowShare
+`b528a9eae8e2e84315d9bf7af8d7555924acc976` 与修正共享媒体流播放的 Remote Tab
+`968a66092edff2de72f36055ec97a08c4b473f47` 完成完整检查、设计校验和源码候选生成。
+实际下载附件通过正式校验器，两个 source record 均为上述 clean `git-commit`。
+本次只请求源码检查，五镜像 job 为 skipped；下述五镜像结果仍对应其原始提交配对。
+证据位于忽略的 `tmp/hosted-ci-qa/paired-968a660*`。
+
 ### 五镜像托管构建与收到的制品验证（2026-09-08）
 
 [手动 OCI CI](https://github.com/x3zvawq/browshare/actions/runs/34209361177) 对 BrowShare
@@ -532,6 +541,57 @@ context、平台、target 与 tag 参数。
 
 这是实际构建器与 Docker 本地镜像库的输出边界验证，不代替五类应用镜像构建或新安装业务
 验收。原失败与修复日志保存在忽略的 `tmp/public-source-install-qa/`；已有候选数据卷保留。
+
+### 严格 umask 下的非 root 镜像文件权限（2026-09-08）
+
+Portal 客户端更新使用 `umask 077` 检出公开源码，经正式快照与 OCI 构建后，实际部署的
+非 root nginx 无法读取 root 所有的 `0600` 配置文件，Portal 健康检查失败。Dockerfile 的
+配置文件及三处 Node 健康检查脚本复制统一指定 `--chmod=0644`，不依赖源码检出者的 umask，
+也不更改服务用户或放宽私密配置权限。修复提交为
+`5fa3c388d7e779a236cb70253b623c2b1175a300`。
+
+实际容器对照保留输入文件 `0600`：nginx UID 101 使用原 COPY 时读取失败，新 COPY 时成功；
+Node UID 1000 在与正式镜像相同的 `WORKDIR /app` 下，原 COPY 报 `EACCES`，新 COPY 读取
+完整 1,133 字节，摘要与原健康脚本相同。三个 Node 镜像使用同一条复制指令，此处是共用
+文件读取边界的验证，不称三个完整业务镜像都已重建。最初 Node probe 漏写 `WORKDIR /app`
+导致隐式目录权限不同，该 probe 已纠正，原记录保留，不作为另一项产品缺陷。
+证据位于忽略的 `tmp/portal-client-fix-qa/`，临时验证容器和构建器均已停止。
+修复提交的 [托管 CI](https://github.com/x3zvawq/browshare/actions/runs/34226779275) 完成
+配套 Remote Tab `968a66092edff2de72f36055ec97a08c4b473f47` 的完整检查及源码候选生成；
+本次 push 的可选五镜像 job 为 skipped，完整 Portal 镜像部署结果单独记录。
+
+### Portal 采用修正后的公共媒体客户端（2026-09-08）
+
+从 clean 公开提交 BrowShare `5fa3c388d7e779a236cb70253b623c2b1175a300` 与 Remote Tab
+`968a66092edff2de72f36055ec97a08c4b473f47`，仍以 `umask 077` 检出并通过正式
+`release:prepare`、`build-release-image.sh portal` 生成同一配对快照的 OCI。SBOM、六文件
+checksum 和未签名 BuildKit provenance 通过验证，实际导入并部署的新 Portal image ID 为
+`sha256:3f61bd217b3ae910b7f27ce5d5e0a1ba9c79896a48f99ac2b5c796f7803d3a43`。
+仅 `BROWSHARE_PORTAL_IMAGE` 发生配置变更；其他应用镜像仍为原 `6899c31` 候选，所有卷、
+Worker/Credential 及持久身份摘要保持一致。受限 builder 在恢复六服务前停止，五个健康
+检查 healthy，TURN 运行但没有定义容器健康检查。
+
+实际 Portal 的新 Profile/Session 在 Google Chrome Stable 中完成嵌入式 Viewer 连接。
+观测同一 MediaStream 的 audio/video 两次 track 回调只触发一次非空 `srcObject` 设置、
+一次 `play()` 及成功 resolve，没有 `AbortError`。1280×720 视频的 decoded frames 从
+25 增至 72，currentTime 从 1.197 增至 3.264 秒；Backend Session 为 `CONNECTED`，独立
+业务目标实际收到鼠标聚焦后的键盘输入。这证明部署的 Portal 已采用修正后的播放逻辑。
+实际 HTTP 返回的 SessionViewer chunk 及 sourcemap 也包含与本轮实测、托管下载均相同的
+Client 完整入口，SHA-256 为
+`8010f65c712e28e3931eccfcaf96572fde9aa128d77372064e092be007ac0c6f`。
+
+浏览器只对本组既有开发 CA leaf 使用临时 SPKI 例外，不把此项称为公网 CA 或强制 TURN/TLS
+验收；Remote Tab 的完整桌面及四种传输矩阵另有自己的证据。构建、原失败、权限对照和真实
+Viewer 结果保存在忽略的 `tmp/portal-client-fix-qa/`。
+
+收尾通过公共接口关闭 Session 并删除 Profile：Session 为 `CLOSED`，Profile 返回 404，
+Worker `ONLINE/controlReady`、activeTabs 0；对应 Profile、Session、spool 和 retained
+download 路径均无残留，Worker 无 Chrome/display 进程。自有本机 Chrome、测试目标服务及
+20443 转发已关闭，用户既有浏览器保留。六服务继续运行，受限 builder 停止。
+最新配置、CA 与 Secret 另归档并复制本机，权限 `0600`，35 个成员及新 Portal 引用已核对。
+该归档为 96,734 字节，SHA-256
+`d47d83ca5c63eb0f59908c819a0f51db8dc7dddec4e81f51719d634dce0ccf17`；这是配置归档，
+不冒充新一轮数据库/Profile 完整备份，原有同点冷备份与旧 Portal 回滚配置仍保留。
 
 ### 公开源码隔离安装、候选替换和原身份恢复（2026-09-08）
 
