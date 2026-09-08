@@ -1,0 +1,1 @@
+ALTER TABLE "tab_sessions" ADD COLUMN "core_binding_token_digest" varchar(128);

@@ -1,0 +1,44 @@
+name: ${BROWSHARE_COMPOSE_PROJECT:?set unique Worker project name}
+services:
+  worker:
+    extends: { file: compose.worker-runtime.yml, service: worker }
+    networks: [worker]
+
+  files:
+    image: ${BROWSHARE_PORTAL_IMAGE:?set coordinated Portal image for Nginx ingress}
+    restart: unless-stopped
+    read_only: true
+    user: '1000:1000'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=64m']
+    ulimits:
+      nofile: { soft: 8192, hard: 8192 }
+    secrets: [tls_certificate, tls_private_key]
+    volumes:
+      - '${BROWSHARE_DEPLOYMENT_DIRECTORY}/files.conf:/etc/browshare/ingress.conf:ro'
+    networks: [worker]
+    ports:
+      - '${BROWSHARE_BIND_ADDRESS:-127.0.0.1}:${BROWSHARE_FILES_BIND_PORT:?set external files port}:${BROWSHARE_FILES_PORT}'
+    depends_on:
+      worker: { condition: service_started }
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: '3' }
+
+networks:
+  worker: {}
+volumes:
+  worker_identity: {}
+  worker_profiles: {}
+  worker_session_temp: {}
+  worker_policy: {}
+secrets:
+  tls_ca_certificate:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/tls/control-tls-ca-certificate.pem'
+  tls_certificate:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/tls/files-certificate.pem'
+  tls_private_key:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/tls/files-private-key.pem'
+  remote_tab_runtime_secret:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/remote_tab_runtime_secret'

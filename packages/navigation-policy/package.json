@@ -1,0 +1,20 @@
+{
+  "name": "@browshare/navigation-policy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsdown src/index.ts src/script-worker.ts --format esm --dts --clean",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@browshare/contracts": "workspace:*",
+    "quickjs-emscripten": "0.32.0"
+  }
+}

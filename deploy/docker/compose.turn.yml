@@ -1,0 +1,13 @@
+name: ${BROWSHARE_COMPOSE_PROJECT:-browshare-turn}
+
+services:
+  turn:
+    extends: { file: compose.turn-runtime.yml, service: turn }
+
+secrets:
+  turn_configuration:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY:?set BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/turn_configuration'
+  turn_certificate:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/turn/tls-certificate.pem'
+  turn_private_key:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/turn/tls-private-key.pem'

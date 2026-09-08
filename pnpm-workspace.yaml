@@ -1,0 +1,12 @@
+packages:
+  - apps/*
+  - packages/*
+
+onlyBuiltDependencies:
+  - argon2
+  - esbuild
+
+patchedDependencies:
+  proxy-chain@3.0.0: patches/proxy-chain@3.0.0.patch
+  socks-proxy-agent@8.0.5: patches/socks-proxy-agent@8.0.5.patch
+  socks@2.8.10: patches/socks@2.8.10.patch

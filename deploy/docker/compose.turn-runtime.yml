@@ -1,0 +1,23 @@
+# Shared coturn runtime; consumed through Compose extends, not started on its own.
+services:
+  turn:
+    image: ghcr.io/coturn/coturn:4.17.2@sha256:aa68aab64a3b929d57fc2924c98ea447bf996cf8dade2508e7b71eaf23f1f14e
+    restart: unless-stopped
+    user: '65534:65534'
+    read_only: true
+    network_mode: host
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    # The official turnserver binary has this file capability and otherwise fails with EPERM.
+    cap_add: [NET_BIND_SERVICE]
+    command: ['-c', '/run/secrets/turn_configuration']
+    secrets: [turn_configuration, turn_certificate, turn_private_key]
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=16m']
+    cpus: 1.0
+    mem_limit: 256m
+    pids_limit: 64
+    ulimits:
+      nofile: { soft: 8192, hard: 8192 }
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: '3' }

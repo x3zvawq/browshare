@@ -1,0 +1,24 @@
+# A separate origin serves only the exact Worker claim route.
+server {
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    listen __FILES_PORT__ ssl;
+    server_name __HOSTNAME__;
+    ssl_certificate /run/secrets/tls_certificate;
+    ssl_certificate_key /run/secrets/tls_private_key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    client_max_body_size 8k;
+    set $worker_files http://worker:3411;
+    location = /claim {
+        proxy_pass $worker_files;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        # Portal cookies are host-scoped and may accompany requests to another port.
+        proxy_set_header Cookie '';
+        proxy_set_header Authorization '';
+        proxy_request_buffering off;
+        proxy_buffering off;
+        proxy_read_timeout 75s;
+        proxy_send_timeout 75s;
+    }
+    location / { return 404; }
+}

@@ -1,0 +1,56 @@
+name: ${BROWSHARE_COMPOSE_PROJECT:-browshare-gateway}
+
+x-runtime: &runtime
+  restart: unless-stopped
+  read_only: true
+  user: '${BROWSHARE_RUNTIME_UID:-1000}:${BROWSHARE_RUNTIME_GID:-1000}'
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  tmpfs: ['/tmp:rw,noexec,nosuid,size=64m']
+  networks: [gateway]
+  stop_grace_period: 30s
+  ulimits:
+    nofile: { soft: 8192, hard: 8192 }
+  logging:
+    driver: json-file
+    options: { max-size: 10m, max-file: '3' }
+
+services:
+  gateway:
+    <<: *runtime
+    image: ${BROWSHARE_GATEWAY_IMAGE:?set BROWSHARE_GATEWAY_IMAGE}
+    env_file: ['${BROWSHARE_DEPLOYMENT_DIRECTORY:?set BROWSHARE_DEPLOYMENT_DIRECTORY}/gateway.env']
+    secrets: [gateway_secret, backend_ca_certificate, turn_shared_secret]
+    cpus: '${BROWSHARE_GATEWAY_CPUS:-1}'
+    mem_limit: '${BROWSHARE_GATEWAY_MEMORY:-512m}'
+    pids_limit: 128
+
+  ingress:
+    <<: *runtime
+    # Reuse the coordinated Nginx image; the mounted configuration serves no Portal assets.
+    image: ${BROWSHARE_INGRESS_IMAGE:?set BROWSHARE_INGRESS_IMAGE}
+    secrets: [tls_certificate, tls_private_key]
+    volumes:
+      - '${BROWSHARE_DEPLOYMENT_DIRECTORY}/ingress.conf:/etc/browshare/ingress.conf:ro'
+    ports:
+      - '${BROWSHARE_BIND_ADDRESS:-127.0.0.1}:${BROWSHARE_HTTPS_PORT:-8443}:${BROWSHARE_HTTPS_LISTEN_PORT:-${BROWSHARE_HTTPS_PORT:-8443}}'
+    depends_on:
+      gateway: { condition: service_started }
+    cpus: '${BROWSHARE_INGRESS_CPUS:-1}'
+    mem_limit: '${BROWSHARE_INGRESS_MEMORY:-256m}'
+    pids_limit: 64
+
+networks:
+  gateway: {}
+
+secrets:
+  gateway_secret:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/gateway_secret'
+  backend_ca_certificate:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/tls/backend-ca-certificate.pem'
+  turn_shared_secret:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/turn_shared_secret'
+  tls_certificate:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/tls/gateway-certificate.pem'
+  tls_private_key:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/tls/gateway-private-key.pem'

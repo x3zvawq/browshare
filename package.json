@@ -1,0 +1,61 @@
+{
+  "name": "browshare-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/x3zvawq/browshare.git"
+  },
+  "type": "module",
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": ">=24.11.0"
+  },
+  "scripts": {
+    "build": "pnpm generate:openapi && pnpm -r --if-present build",
+    "build:shared": "pnpm --filter @browshare/contracts --filter @browshare/config --filter @browshare/navigation-policy --filter @browshare/common --filter @browshare/database --filter @browshare/api-client -r build",
+    "check": "pnpm compatibility:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm build",
+    "compatibility:check": "node tools/check-worker-runtime-compatibility.mjs",
+    "release:prepare": "node tools/prepare-release-candidate.mjs",
+    "release:finalize": "node tools/release-artifacts.mjs finalize",
+    "release:verify": "node tools/release-artifacts.mjs verify",
+    "release:image": "bash tools/build-release-image.sh",
+    "dev:backend": "pnpm --filter @browshare/backend dev",
+    "dev:portal": "pnpm --filter @browshare/portal dev",
+    "dev:worker": "pnpm --filter @browshare/worker dev",
+    "database:migrate": "pnpm --filter @browshare/database migrate",
+    "database:migration:generate": "pnpm --filter @browshare/database migration:generate",
+    "database:backup": "./tools/database-backup.sh",
+    "database:restore": "./tools/database-restore.sh",
+    "database:backup-retain": "./tools/database-backup-retain.sh",
+    "profile:archive": "./tools/profile-archive.sh",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "generate:openapi": "pnpm --filter @browshare/backend build && pnpm --filter @browshare/backend generate:openapi && pnpm --filter @browshare/api-client generate",
+    "lint": "eslint .",
+    "smoke": "node tools/smoke-foundation.mjs",
+    "typecheck": "pnpm build:shared && pnpm -r --if-present typecheck",
+    "worker-ca:generate": "node tools/generate-worker-ca.mjs",
+    "worker-control-tls:generate": "node tools/generate-development-control-tls.mjs",
+    "worker:image:build": "./tools/build-worker-image.sh",
+    "gateway:image:build": "./tools/build-gateway-image.sh",
+    "control:images:build": "./tools/build-control-images.sh",
+    "deployment:prepare:development": "node tools/prepare-development-deployment.mjs",
+    "worker:image:verify": "./tools/verify-worker-image.sh",
+    "worker:host:check": "node tools/check-worker-host.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.13.3",
+    "eslint": "10.10.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-vue": "10.10.0",
+    "globals": "17.12.0",
+    "prettier": "3.9.6",
+    "tsdown": "0.23.0",
+    "tsx": "4.23.13",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.69.0",
+    "vue-eslint-parser": "10.4.1"
+  }
+}

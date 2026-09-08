@@ -1,0 +1,119 @@
+name: ${BROWSHARE_COMPOSE_PROJECT:-browshare}
+
+x-runtime: &runtime
+  restart: unless-stopped
+  read_only: true
+  user: '${BROWSHARE_RUNTIME_UID:-1000}:${BROWSHARE_RUNTIME_GID:-1000}'
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  tmpfs: ['/tmp:rw,noexec,nosuid,size=64m']
+  networks: [control]
+  stop_grace_period: 30s
+  ulimits:
+    nofile: { soft: 8192, hard: 8192 }
+  logging:
+    driver: json-file
+    options: { max-size: 10m, max-file: '3' }
+
+services:
+  postgres:
+    image: postgres:17-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: browshare
+      POSTGRES_USER: browshare
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets: [postgres_password]
+    volumes: [postgres:/var/lib/postgresql/data]
+    networks: [database]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U browshare -d browshare']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: '3' }
+
+  migrator:
+    <<: *runtime
+    image: ${BROWSHARE_MIGRATOR_IMAGE:?set BROWSHARE_MIGRATOR_IMAGE}
+    restart: 'no'
+    environment:
+      DATABASE_URL_FILE: /run/secrets/database_url
+    secrets: [database_url]
+    networks: [database]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  backend:
+    <<: *runtime
+    image: ${BROWSHARE_BACKEND_IMAGE:?set BROWSHARE_BACKEND_IMAGE}
+    env_file: ['${BROWSHARE_DEPLOYMENT_DIRECTORY:?set BROWSHARE_DEPLOYMENT_DIRECTORY}/backend.env']
+    secrets:
+      - database_url
+      - session_secret
+      - bootstrap_token
+      - gateway_registry
+      - worker_ca_certificate
+      - worker_ca_private_key
+      - tls_certificate
+      - tls_private_key
+      - tls_ca_certificate
+    networks: [database, control]
+    depends_on:
+      migrator: { condition: service_completed_successfully }
+
+  gateway:
+    <<: *runtime
+    image: ${BROWSHARE_GATEWAY_IMAGE:?set BROWSHARE_GATEWAY_IMAGE}
+    env_file: ['${BROWSHARE_DEPLOYMENT_DIRECTORY}/gateway.env']
+    secrets: [gateway_secret, tls_ca_certificate]
+    depends_on:
+      backend: { condition: service_healthy }
+
+  portal:
+    <<: *runtime
+    image: ${BROWSHARE_PORTAL_IMAGE:?set BROWSHARE_PORTAL_IMAGE}
+    secrets: [tls_certificate, tls_private_key]
+    volumes:
+      - '${BROWSHARE_DEPLOYMENT_DIRECTORY}/ingress.conf:/etc/browshare/ingress.conf:ro'
+      - '${BROWSHARE_DEPLOYMENT_DIRECTORY}/stream.conf:/etc/browshare/stream.conf:ro'
+    networks:
+      control:
+        aliases: ['${BROWSHARE_PUBLIC_HOSTNAME:?set BROWSHARE_PUBLIC_HOSTNAME}']
+    ports:
+      - '${BROWSHARE_BIND_ADDRESS:-127.0.0.1}:${BROWSHARE_HTTPS_PORT:-8443}:${BROWSHARE_HTTPS_PORT:-8443}'
+      - '${BROWSHARE_BIND_ADDRESS:-127.0.0.1}:${BROWSHARE_CONTROL_PORT:-8445}:${BROWSHARE_CONTROL_PORT:-8445}'
+    depends_on:
+      backend: { condition: service_started }
+      gateway: { condition: service_started }
+
+networks:
+  database: { internal: true }
+  control: {}
+volumes:
+  postgres: {}
+secrets:
+  postgres_password:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/postgres_password'
+  database_url:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/database_url'
+  session_secret:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/session_secret'
+  bootstrap_token:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/bootstrap_token'
+  gateway_secret:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/gateway_secret'
+  gateway_registry:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/gateway_registry'
+  worker_ca_certificate:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/worker-ca/worker-ca-certificate.pem'
+  worker_ca_private_key:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/worker-ca/worker-ca-private-key.pem'
+  tls_certificate:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/tls/control-tls-certificate.pem'
+  tls_private_key:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/tls/control-tls-private-key.pem'
+  tls_ca_certificate:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/tls/control-tls-ca-certificate.pem'

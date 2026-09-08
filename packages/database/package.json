@@ -1,0 +1,36 @@
+{
+  "name": "@browshare/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.mts",
+      "import": "./dist/schema/index.mjs"
+    }
+  },
+  "bin": {
+    "browshare-migrate": "./dist/cli.mjs"
+  },
+  "scripts": {
+    "build": "tsdown src/index.ts src/schema/index.ts src/cli.ts --format esm --dts --clean",
+    "migrate": "tsx src/cli.ts",
+    "migrate:production": "node dist/cli.mjs",
+    "migration:generate": "drizzle-kit generate",
+    "migration:generate:initial": "drizzle-kit generate --name=initial_schema",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@browshare/config": "workspace:*",
+    "drizzle-orm": "0.45.2",
+    "postgres": "3.4.9",
+    "@browshare/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.10"
+  }
+}

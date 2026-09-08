@@ -1,0 +1,48 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: light;
+  --bs-primary: #0f62d6;
+  --bs-canvas: #f5f7fb;
+  --bs-surface: #ffffff;
+  --bs-text: #172033;
+  --bs-text-muted: #667085;
+  --bs-border: #e4e9f2;
+  --bs-font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  font-family: Inter, 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bs-primary: #5aa9ff;
+  --bs-canvas: #0c111d;
+  --bs-surface: #151c2c;
+  --bs-text: #f4f7fc;
+  --bs-text-muted: #aab5c7;
+  --bs-border: #2b3548;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 320px;
+  background: var(--bs-canvas);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}

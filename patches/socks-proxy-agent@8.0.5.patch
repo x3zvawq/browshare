@@ -1,0 +1,13 @@
+diff --git a/dist/index.js b/dist/index.js
+index 15e06e8f43176531860b4aafdf750ee1dd997ed2..665b2f8ec44a9ed38055b54c638942f59669cdaf 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -49,7 +49,7 @@ const setServernameFromNonIpHost = (options) => {
+ function parseSocksURL(url) {
+     let lookup = false;
+     let type = 5;
+-    const host = url.hostname;
++    const host = url.hostname.replace(/^\[|\]$/g, '');
+     // From RFC 1928, Section 3: https://tools.ietf.org/html/rfc1928#section-3
+     // "The SOCKS service is conventionally located on TCP port 1080"
+     const port = parseInt(url.port, 10) || 1080;

@@ -1,0 +1,1 @@
+ALTER TABLE "tab_sessions" ADD COLUMN "recycling" jsonb;

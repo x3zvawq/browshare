@@ -1,0 +1,28 @@
+{
+  "name": "@browshare/portal",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ../../tools/prepare-portal-viewer.mjs && vite build",
+    "dev": "node ../../tools/prepare-portal-viewer.mjs && vite",
+    "preview": "vite preview",
+    "typecheck": "node ../../tools/prepare-portal-viewer.mjs && vue-tsc --noEmit -p tsconfig.app.json"
+  },
+  "dependencies": {
+    "@browshare/api-client": "workspace:*",
+    "@vicons/ionicons5": "0.13.0",
+    "naive-ui": "2.45.3",
+    "pinia": "4.0.3",
+    "vue": "3.5.42",
+    "vue-i18n": "11.4.10",
+    "vue-router": "5.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@vitejs/plugin-vue": "6.0.8",
+    "tailwindcss": "4.3.3",
+    "vite": "8.2.2",
+    "vue-tsc": "3.3.11"
+  }
+}

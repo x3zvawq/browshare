@@ -1,0 +1,102 @@
+diff --git a/dist/chain_socks.js b/dist/chain_socks.js
+index 9915c8126f0619cf710aa6b9a56c7e4a6f48cb85..3729ded8859ee67505458969d40ca2119179f1a6 100644
+--- a/dist/chain_socks.js
++++ b/dist/chain_socks.js
+@@ -25,7 +25,7 @@ export const chainSocks = async ({ request, sourceSocket, head, server, handlerO
+     const { proxyChainId } = sourceSocket;
+     const { hostname, port, username, password } = handlerOpts.upstreamProxyUrlParsed;
+     const proxy = {
+-        host: hostname,
++        host: hostname.replace(/^\[|\]$/g, ''),
+         port: Number(port),
+         type: socksProtocolToVersionNumber(handlerOpts.upstreamProxyUrlParsed.protocol),
+         userId: decodeURIComponent(username),
+@@ -44,19 +44,29 @@ export const chainSocks = async ({ request, sourceSocket, head, server, handlerO
+     const url = new URL(`connect://${request.url}`);
+     const destination = {
+         port: Number(url.port),
+-        host: url.hostname,
++        host: url.hostname.replace(/^\[|\]$/g, ''),
+     };
++    const controller = new AbortController();
++    const cancel = () => controller.abort();
++    sourceSocket.once('close', cancel);
++    if (sourceSocket.destroyed) cancel();
+     let targetSocket;
+     try {
+         const client = await SocksClient.createConnection({
+             proxy,
+             command: 'connect',
+             destination,
++            socket_options: { signal: controller.signal },
+         });
+         targetSocket = client.socket;
++        if (sourceSocket.destroyed) {
++            targetSocket.destroy();
++            return;
++        }
+         sourceSocket.write(`HTTP/1.1 200 Connection Established\r\n\r\n`);
+     }
+     catch (error) {
++        sourceSocket.removeListener('close', cancel);
+         const socksError = error;
+         server.log(proxyChainId, `Failed to connect to upstream SOCKS proxy ${socksError.stack}`);
+         sourceSocket.end(createCustomStatusHttpResponse(socksErrorMessageToStatusCode(socksError.message), socksError.message));
+diff --git a/dist/direct.js b/dist/direct.js
+index 3b3815de48c8ce308dcc280996097fc9bde882e2..632f9448c3967db1ccd08884dc266e9e73508638 100644
+--- a/dist/direct.js
++++ b/dist/direct.js
+@@ -48,12 +48,10 @@ export const direct = ({ request, sourceSocket, head, server, handlerOpts, }) =>
+             sourceSocket.end();
+         }
+     });
+-    // Same here.
++    // A fully closed client cannot consume more target data. end() only
++    // half-closes TCP and leaves targets that keep their write side open alive.
+     sourceSocket.on('close', () => {
+-        targetSocket.resume();
+-        if (targetSocket.writable) {
+-            targetSocket.end();
+-        }
++        targetSocket.destroy();
+     });
+     const { proxyChainId } = sourceSocket;
+     targetSocket.on('error', (error) => {
+diff --git a/dist/forward.js b/dist/forward.js
+index c724618f47d8ce98168f34ab19221abd891d5223..756163b2a2774571f9a4b58355a6f002a561964e 100644
+--- a/dist/forward.js
++++ b/dist/forward.js
+@@ -79,6 +79,7 @@ export const forward = async (request, response, handlerOpts) => new Promise(asy
+             ...options,
+             agent: handlerOpts.httpAgent,
+         }, requestCallback);
++    response.once('close', () => client.destroy());
+     client.once('socket', (socket) => {
+         // Socket can be re-used by multiple requests.
+         // That's why we need to track the previous stats.
+diff --git a/dist/forward_socks.js b/dist/forward_socks.js
+index 047502370f0f81c02dbbeccf8c6552c6b80203f7..64a901b436e074b8dc001f24348dc6c670ceb549 100644
+--- a/dist/forward_socks.js
++++ b/dist/forward_socks.js
+@@ -17,7 +17,12 @@ import { validHeadersOnly } from './utils/valid_headers_only.js';
+  * ```
+  */
+ export const forwardSocks = async (request, response, handlerOpts) => new Promise(async (resolve, reject) => {
+-    const agent = new SocksProxyAgent(handlerOpts.upstreamProxyUrlParsed);
++    // Cancel upstream establishment even before the Agent assigns a socket.
++    const controller = new AbortController();
++    response.once('close', () => controller.abort());
++    const agent = new SocksProxyAgent(handlerOpts.upstreamProxyUrlParsed, {
++        socketOptions: { signal: controller.signal },
++    });
+     const options = {
+         method: request.method,
+         headers: validHeadersOnly(request.rawHeaders),
+@@ -49,6 +54,7 @@ export const forwardSocks = async (request, response, handlerOpts) => new Promis
+             resolve();
+         }
+     });
++    response.once('close', () => client.destroy());
+     client.once('socket', (socket) => {
+         countTargetBytes(request.socket, socket);
+     });

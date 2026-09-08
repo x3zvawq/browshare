@@ -1,0 +1,134 @@
+name: CI and release candidates
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      build_images:
+        description: Build all five local OCI candidates, including the local-use Chrome Worker
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REMOTE_REPOSITORY: ${{ vars.BROWSHARE_REMOTE_TAB_REPOSITORY }}
+  REMOTE_REVISION: ${{ vars.BROWSHARE_REMOTE_TAB_REVISION }}
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: browshare
+    steps:
+      - name: Require the paired repository and immutable revision
+        working-directory: .
+        shell: bash
+        run: |
+          [[ "$REMOTE_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]
+          [[ "$REMOTE_REVISION" =~ ^[a-f0-9]{40}$ ]]
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: browshare
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ env.REMOTE_REPOSITORY }}
+          ref: ${{ env.REMOTE_REVISION }}
+          path: browshare-tab-remote
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.12.0
+      - name: Install the two locked workspaces
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.28.2 --activate
+          pnpm install --frozen-lockfile
+          pnpm --dir ../browshare-tab-remote install --frozen-lockfile
+      - run: pnpm check
+      - run: npx --yes @google/design.md@0.4.0 lint docs/DESIGN.md
+      - run: pnpm release:prepare
+      - uses: anchore/sbom-action/download-syft@43a17d6e7add2b5535efe4dcae9952337c479a93 # v0.20.11
+        id: syft
+        with:
+          syft-version: v1.51.1
+      - name: Catalog the exact archived source snapshots
+        env:
+          SYFT: ${{ steps.syft.outputs.cmd }}
+        run: |
+          for source in browshare browshare-tab-remote; do
+            "$SYFT" scan "dir:tmp/release-candidate/.sources/$source" --source-name "$source" \
+              -o "cyclonedx-json=tmp/release-candidate/sbom-$source.cdx.json" \
+              -o "spdx-json=tmp/release-candidate/sbom-$source.spdx.json"
+          done
+          pnpm release:finalize tmp/release-candidate
+          pnpm release:verify tmp/release-candidate
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: paired-source-candidate
+          path: browshare/tmp/release-candidate/*
+          if-no-files-found: error
+          retention-days: 14
+
+  images:
+    if: github.event_name == 'workflow_dispatch' && inputs.build_images
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [backend, migrator, gateway, portal, worker-chrome]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: browshare
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ env.REMOTE_REPOSITORY }}
+          ref: ${{ env.REMOTE_REVISION }}
+          path: browshare-tab-remote
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.12.0
+      - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+      - name: Prepare and build local OCI output
+        working-directory: browshare
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.28.2 --activate
+          pnpm install --frozen-lockfile
+          pnpm --dir ../browshare-tab-remote install --frozen-lockfile
+          pnpm release:prepare
+          bash tmp/release-candidate/.sources/browshare/tools/build-release-image.sh "$TARGET" "tmp/image-$TARGET"
+      - name: Upload control-plane candidates
+        if: matrix.target != 'worker-chrome'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: oci-${{ matrix.target }}
+          path: browshare/tmp/image-${{ matrix.target }}/*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload Worker build facts only
+        if: matrix.target == 'worker-chrome'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: worker-local-build-facts
+          path: |
+            browshare/tmp/image-worker-chrome/*.json
+            browshare/tmp/image-worker-chrome/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 7

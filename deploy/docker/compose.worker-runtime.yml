@@ -1,0 +1,39 @@
+# Shared Worker runtime; consumed through Compose extends, not started on its own.
+services:
+  worker:
+    image: ${BROWSHARE_WORKER_IMAGE:?set BROWSHARE_WORKER_IMAGE}
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=./chrome-seccomp.json
+    cap_drop: [ALL]
+    # The Chrome seccomp profile gates its namespace sandbox chroot on this bounding capability.
+    cap_add: [SYS_CHROOT]
+    cpus: ${BROWSHARE_WORKER_CPUS:-2.0}
+    mem_limit: ${BROWSHARE_WORKER_MEMORY:-2g}
+    pids_limit: ${BROWSHARE_WORKER_PIDS:-1024}
+    shm_size: 1gb
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+      - /run:rw,noexec,nosuid,size=16m
+      # Chrome's launcher and crash handler write per-user metadata outside user-data-dir.
+      - /home/node:rw,noexec,nosuid,uid=1000,gid=1000,mode=0700,size=64m
+    stop_grace_period: 30s
+    ulimits:
+      nofile: { soft: 8192, hard: 8192 }
+    env_file: ['${BROWSHARE_DEPLOYMENT_DIRECTORY}/worker.env']
+    secrets:
+      - tls_ca_certificate
+      - remote_tab_runtime_secret
+    volumes:
+      - worker_identity:/var/lib/browshare/identity
+      - worker_profiles:/var/lib/browshare/profiles
+      - worker_session_temp:/var/lib/browshare/session-temp
+      - worker_policy:/var/lib/browshare/chrome-policy
+      - '${BROWSHARE_EXTENSION_CRX_FILE:?set signed Extension CRX file}:/opt/browshare/extension-release/${BROWSHARE_EXTENSION_CRX_NAME:?set Extension artifact name}:ro'
+      # Mount the directory so deleting the consumed Token does not break container recreation.
+      - '${BROWSHARE_DEPLOYMENT_DIRECTORY}/worker-enrollment:/run/browshare-enrollment:ro'
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: '3' }

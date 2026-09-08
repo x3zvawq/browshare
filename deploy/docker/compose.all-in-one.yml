@@ -1,0 +1,39 @@
+# Merge with compose.control.yml. Start Worker only after supplying its Enrollment Token.
+services:
+  gateway:
+    secrets: [turn_shared_secret]
+
+  turn:
+    extends: { file: compose.turn-runtime.yml, service: turn }
+    profiles: [turn]
+
+  portal:
+    volumes:
+      - '${BROWSHARE_DEPLOYMENT_DIRECTORY}/files.conf:/etc/browshare/files.conf:ro'
+    ports:
+      - '${BROWSHARE_BIND_ADDRESS:-127.0.0.1}:${BROWSHARE_FILES_PORT:-8446}:${BROWSHARE_FILES_PORT:-8446}'
+
+  worker:
+    extends: { file: compose.worker-runtime.yml, service: worker }
+    profiles: [worker]
+    networks: [control]
+    depends_on:
+      portal: { condition: service_healthy }
+      gateway: { condition: service_healthy }
+
+volumes:
+  worker_identity: {}
+  worker_profiles: {}
+  worker_session_temp: {}
+  worker_policy: {}
+secrets:
+  turn_shared_secret:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/turn_shared_secret'
+  turn_configuration:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/turn_configuration'
+  turn_certificate:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/turn/tls-certificate.pem'
+  turn_private_key:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/turn/tls-private-key.pem'
+  remote_tab_runtime_secret:
+    file: '${BROWSHARE_DEPLOYMENT_DIRECTORY}/secrets/remote_tab_runtime_secret'

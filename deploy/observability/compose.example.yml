@@ -1,0 +1,29 @@
+services:
+  prometheus:
+    image: ${PROMETHEUS_IMAGE:?set an explicit Prometheus image digest}
+    restart: unless-stopped
+    network_mode: host
+    user: '65534:65534'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cpus: '0.5'
+    mem_limit: 256m
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+      - --storage.tsdb.retention.size=256MB
+      - --web.listen-address=127.0.0.1:9090
+    volumes:
+      - type: bind
+        source: ${PROMETHEUS_CONFIG_FILE:?set the absolute path to your scrape configuration}
+        target: /etc/prometheus/prometheus.yml
+        read_only: true
+      - type: bind
+        source: ${PROMETHEUS_GATEWAY_SECRET_FILE:?set the Gateway secret file readable by uid 65534}
+        target: /run/secrets/gateway-secret
+        read_only: true
+      - metrics:/prometheus
+volumes:
+  metrics:

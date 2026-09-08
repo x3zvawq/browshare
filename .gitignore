@@ -1,0 +1,13 @@
+/.DS_Store
+/authorized_keys
+/tmp/
+
+node_modules/
+.pnpm-store/
+dist/
+coverage/
+.vite/
+.turbo/
+.env
+.env.*
+!.env.example

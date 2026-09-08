@@ -1,0 +1,8 @@
+# Forward TLS unchanged: Backend validates Worker client certificates itself.
+server {
+    listen __CONTROL_PORT__;
+    set $control_backend backend:3443;
+    proxy_pass $control_backend;
+    proxy_connect_timeout 10s;
+    proxy_timeout 90s;
+}
