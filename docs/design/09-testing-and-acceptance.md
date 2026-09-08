@@ -478,6 +478,28 @@ Remote Tab 的 `v0.1.23` 本地发布检查通过，六份实际 npm 压缩包�
 与子目录。此时两个远程仓库仍无提交和 refs，未设置虚构的固定 revision；没有创建 commit、
 push、托管 CI 运行或任何公开包/镜像/Extension 发布。固定提交与托管 CI 项保持未勾选。
 
+### 首次公开提交与托管 CI（2026-09-08）
+
+用户授权后，两仓库分别以 `init` 创建首次提交并推送公开 main：BrowShare 为
+`26f1bff785f4c7adeb201d0b06af580c2fd84293`，Remote Tab 为
+`c4457f08580812349e68c31c741d010fdd5f0c82`。BrowShare 的配套 revision 变量已设置并读回
+后一个完整 SHA；提交前核对正式文件范围与候选，未纳入 `tmp/`、运行数据或凭据。
+
+[BrowShare CI](https://github.com/x3zvawq/browshare/actions/runs/34207833258) 完成完整检查、
+设计校验和源码候选生成。实际下载的 12 文件附件通过正式校验工具，两个 source record 均为
+对应的 clean `git-commit`，没有将脏工作区标为提交构建。本次 push 未请求可选五镜像 job，
+该 job 如实为 skipped。
+
+[Remote Tab CI](https://github.com/x3zvawq/browshare-remote-tab/actions/runs/34207712780)
+的源码/测试/包/文档/Compose、三类容器构建、GitHub provenance 和汇总 Gate 全部成功。
+下载后的 19 项 checksum 与来源 subjects 验证通过；六个 npm 候选包分别通过 `gh attestation
+verify`，限定实际仓库、CI workflow、完整 source SHA、main ref 且拒绝自托管签名 runner。
+这是托管 CI 附件及其签名验证，不代表 npm/GHCR 或正式 CRX 已发行。
+
+固定提交与托管 CI 项据此完成。公开安装入口另记录可匿名获取的提交配对和 Remote Tab 本地
+目录别名，使部署者无需访问维护者的 Repository Variables。证据在忽略的 `tmp/hosted-ci-qa/`
+与 Remote Tab 的同名目录；后续提交须核对自己的 CI 结果，不能继承首次提交的成功状态。
+
 ## 可观测性端点与启动日志实测（2026-09-07）
 
 本轮修复Backend请求开始时减去 `Date.now()` 导致累计耗时为负数的问题，改为响应结束时累加Fastify单调耗时，并补齐HTTP状态码和Worker存储指标的Prometheus类型声明。Worker输出最近已完成运行时采样的真实开始时间，HTTP抓取继续复用后台采样，不阻塞控制心跳。

@@ -6,10 +6,29 @@
 Backend 与 migrator 使用同一生产依赖及 SQL migration 集合；Portal 包含协调版本 Remote Tab Viewer，
 通过 Nginx 提供静态页面、SPA 路由、REST、SSE 和 WSS。运行时配置与 Secret 不进入镜像。
 
-以下源码安装路径要求 Linux amd64、Docker Engine/Compose v2/Buildx、Node.js 24、pnpm 10.28.2 与 OpenSSL。
-先取得两个协调版本的完整源码目录；Remote Tab 默认位于相邻 `../browshare-tab-remote`，其他位置设置
+以下源码安装路径要求 Linux amd64、Git、Docker Engine/Compose v2/Buildx、Node.js 24、pnpm 10.28.2 与 OpenSSL。
+首次公开源码候选使用以下经过托管 CI 验证的固定配对，不能只凭两仓库的相同版本号混用源码：
+
+| 仓库 | 固定提交 | 托管验证 |
+| --- | --- | --- |
+| BrowShare | `26f1bff785f4c7adeb201d0b06af580c2fd84293` | [CI](https://github.com/x3zvawq/browshare/actions/runs/34207833258) |
+| Remote Tab | `c4457f08580812349e68c31c741d010fdd5f0c82` | [CI](https://github.com/x3zvawq/browshare-remote-tab/actions/runs/34207712780) |
+
+在新的工作目录获取公开源码；Remote Tab 的本地目录别名与 GitHub 仓库名不同，以下命令已显式指定：
+
+```bash
+git clone https://github.com/x3zvawq/browshare.git browshare
+git clone https://github.com/x3zvawq/browshare-remote-tab.git browshare-tab-remote
+git -C browshare checkout --detach 26f1bff785f4c7adeb201d0b06af580c2fd84293
+git -C browshare-tab-remote checkout --detach c4457f08580812349e68c31c741d010fdd5f0c82
+cd browshare
+```
+
+Remote Tab 默认位于相邻 `../browshare-tab-remote`，其他位置设置
 `BROWSHARE_REMOTE_TAB_SOURCE`。两仓库分别运行 `pnpm install --frozen-lockfile`；签名构建也需要 Remote Tab 的依赖。
 当前未发布的工作区不能用尚不存在的 Registry 镜像替代本地构建。
+小内存宿主应先按[受限构建器说明](../../docs/RELEASING.md#带-sbom-和来源记录的-oci-候选)
+限制构建并发与内存，并将构建和 Chrome 业务运行分时安排。
 
 从 BrowShare 仓库根目录构建控制面镜像，并生成独立的开发配置：
 
