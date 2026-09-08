@@ -1230,31 +1230,33 @@ export class EmbeddedRemoteTabRuntime implements RemoteTabRuntimeObserver {
       })
       tabCaptureCheck = PASS('TAB_CAPTURE')
 
-      const offer = waitForMediaOffer(
+      await waitForMediaOffer(
         this.#extension,
         sessionId,
         configuration.requestTimeoutMilliseconds,
-      )
-      this.#extension.sendMediaPeerState(sessionId, true)
-      this.#extension.startMedia({
-        sessionId,
-        viewerGeneration: 1,
-        tabId: attached.tabId,
-        streamId,
-        capabilities: [],
-        iceServers: [],
-        iceTransportPolicy: 'all',
-        viewport: {
-          width: 640,
-          height: 360,
-          deviceScaleFactor: 1,
-          frameRate: 30,
-          revision: 1,
+        () => {
+          this.#extension.sendMediaPeerState(sessionId!, true)
+          this.#extension.startMedia({
+            sessionId: sessionId!,
+            viewerGeneration: 1,
+            tabId: attached!.tabId,
+            streamId,
+            capabilities: [],
+            iceServers: [],
+            iceTransportPolicy: 'all',
+            viewport: {
+              width: 640,
+              height: 360,
+              deviceScaleFactor: 1,
+              frameRate: 30,
+              revision: 1,
+            },
+            audio: false,
+          })
+          mediaStarted = true
         },
-        audio: false,
-      })
-      mediaStarted = true
-      await offer
+        () => this.#closed || cancelled(),
+      )
       webRtcCheck = PASS('WEBRTC')
 
       return {
@@ -1374,14 +1376,19 @@ async function loadRemoteTabPackages(): Promise<RemoteTabPackages> {
   }
 }
 
-async function waitForMediaOffer(
+function waitForMediaOffer(
   extension: ExtensionLoopbackPort,
   sessionId: string,
   timeoutMilliseconds: number,
+  start: () => void,
+  cancelled: () => boolean,
 ): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     let settled = false
-    const finish = (cause?: Error) => {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    let unsubscribe = () => {}
+    const deadline = Date.now() + timeoutMilliseconds
+    const finish = (cause?: unknown) => {
       if (settled) return
       settled = true
       clearTimeout(timer)
@@ -1389,7 +1396,21 @@ async function waitForMediaOffer(
       if (cause === undefined) resolve()
       else reject(cause)
     }
-    const unsubscribe = extension.onMediaSignal((signal) => {
+    const check = () => {
+      if (cancelled()) {
+        finish(new ProfileChromeError('RUNTIME_CLOSED', 'Chrome readiness probe was cancelled'))
+      } else if (Date.now() >= deadline) {
+        finish(
+          Object.assign(new Error('Remote Tab WebRTC offer timed out'), {
+            code: 'WEBRTC_OFFER_TIMEOUT',
+          }),
+        )
+      } else {
+        timer = setTimeout(check, Math.min(250, deadline - Date.now()))
+        timer.unref()
+      }
+    }
+    unsubscribe = extension.onMediaSignal((signal) => {
       if (signal.sessionId !== sessionId) return
       if (signal.type === 'description') finish()
       else if (signal.type === 'start-failed') {
@@ -1399,16 +1420,15 @@ async function waitForMediaOffer(
         finish(error)
       }
     })
-    const timer = setTimeout(
-      () =>
-        finish(
-          Object.assign(new Error('Remote Tab WebRTC offer timed out'), {
-            code: 'WEBRTC_OFFER_TIMEOUT',
-          }),
-        ),
-      timeoutMilliseconds,
-    )
-    timer.unref()
+    check()
+    if (settled) return
+    // Subscribe before starting, but own synchronous startup failures in this same awaited
+    // Promise. Otherwise a failed send leaves an unobserved timeout rejection behind.
+    try {
+      start()
+    } catch (cause) {
+      finish(cause)
+    }
   })
 }
 
