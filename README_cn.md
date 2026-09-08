@@ -66,10 +66,10 @@ BrowShare 提供五个镜像构建目标：Portal、Backend、Migrator、Gateway
 
 ## 两个项目，清晰分工
 
-| 项目 | 用途 |
-| --- | --- |
-| **BrowShare** | 完整工作区平台：Portal、用户与权限、Profile、Worker 调度、策略、审计和数据运维。 |
-| **[BrowShare Remote Tab](https://github.com/x3zvawq/browshare-remote-tab)** | 可嵌入的远程标签页引擎：Chrome 捕获、WebRTC、输入、Viewer、信令和公共接口。 |
+| 项目                                                                        | 用途                                                                             |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **BrowShare**                                                               | 完整工作区平台：Portal、用户与权限、Profile、Worker 调度、策略、审计和数据运维。 |
+| **[BrowShare Remote Tab](https://github.com/x3zvawq/browshare-remote-tab)** | 可嵌入的远程标签页引擎：Chrome 捕获、WebRTC、输入、Viewer、信令和公共接口。      |
 
 BrowShare 的 Worker 嵌入 Remote Tab Core，Portal 复用它的 Viewer。需要完整共享工作区时使用本项目；为自己的应用加入远程标签页时，可以直接使用 Remote Tab。
 
