@@ -7,11 +7,11 @@ Backend 与 migrator 使用同一生产依赖及 SQL migration 集合；Portal �
 通过 Nginx 提供静态页面、SPA 路由、REST、SSE 和 WSS。运行时配置与 Secret 不进入镜像。
 
 以下源码安装路径要求 Linux amd64、Git、Docker Engine/Compose v2/Buildx、Node.js 24、pnpm 10.28.2 与 OpenSSL。
-首次公开源码候选使用以下经过托管 CI 验证的固定配对，不能只凭两仓库的相同版本号混用源码：
+当前公开源码候选使用以下经过托管 CI 验证的固定配对，不能只凭两仓库的相同版本号混用源码：
 
 | 仓库 | 固定提交 | 托管验证 |
 | --- | --- | --- |
-| BrowShare | `26f1bff785f4c7adeb201d0b06af580c2fd84293` | [CI](https://github.com/x3zvawq/browshare/actions/runs/34207833258) |
+| BrowShare | `ce48677cfbf7d9a31ec25ceb551fa8fbcf523619` | [CI](https://github.com/x3zvawq/browshare/actions/runs/34208798519) |
 | Remote Tab | `c4457f08580812349e68c31c741d010fdd5f0c82` | [CI](https://github.com/x3zvawq/browshare-remote-tab/actions/runs/34207712780) |
 
 在新的工作目录获取公开源码；Remote Tab 的本地目录别名与 GitHub 仓库名不同，以下命令已显式指定：
@@ -19,7 +19,7 @@ Backend 与 migrator 使用同一生产依赖及 SQL migration 集合；Portal �
 ```bash
 git clone https://github.com/x3zvawq/browshare.git browshare
 git clone https://github.com/x3zvawq/browshare-remote-tab.git browshare-tab-remote
-git -C browshare checkout --detach 26f1bff785f4c7adeb201d0b06af580c2fd84293
+git -C browshare checkout --detach ce48677cfbf7d9a31ec25ceb551fa8fbcf523619
 git -C browshare-tab-remote checkout --detach c4457f08580812349e68c31c741d010fdd5f0c82
 cd browshare
 ```
