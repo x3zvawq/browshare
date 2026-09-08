@@ -12,9 +12,11 @@ import {
   NModal,
   NSelect,
 } from 'naive-ui'
-import { computed, reactive, useTemplateRef, watch } from 'vue'
+import { computed, reactive, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { proxyRuntimeMessages } from './messages.js'
+import { proxyQuickEntryMessages } from './quick-entry-messages.js'
+import { parseProxyUrl } from './parse-proxy-url.js'
 
 import type { CreateProxyInput, Proxy, UpdateProxyInput } from '@/api/types.js'
 import AccessibleInputNumber from '@/components/forms/AccessibleInputNumber.vue'
@@ -33,7 +35,26 @@ const emit = defineEmits<{
   submit: [input: CreateProxyInput | UpdateProxyInput]
 }>()
 
-const { t } = useI18n({ messages: proxyRuntimeMessages })
+const { t } = useI18n({
+  messages: {
+    'zh-CN': { ...proxyRuntimeMessages['zh-CN'], ...proxyQuickEntryMessages['zh-CN'] },
+    'en-US': { ...proxyRuntimeMessages['en-US'], ...proxyQuickEntryMessages['en-US'] },
+  },
+})
+const quickUrl = shallowRef('')
+const quickStatus = shallowRef<'invalid' | 'applied' | null>(null)
+function applyQuickUrl(): void {
+  if (props.busy) return
+  try {
+    const parsed = parseProxyUrl(quickUrl.value)
+    Object.assign(model, parsed, { clearUsername: false, clearPassword: false })
+    quickUrl.value = ''
+    quickStatus.value = 'applied'
+    formRef.value?.restoreValidation()
+  } catch {
+    quickStatus.value = 'invalid'
+  }
+}
 const formRef = useTemplateRef<FormInst>('form')
 const model = reactive({
   name: '',
@@ -128,7 +149,13 @@ const rules: FormRules = {
 watch(
   () => props.show,
   (show) => {
-    if (!show) return
+    quickUrl.value = ''
+    quickStatus.value = null
+    if (!show) {
+      model.username = ''
+      model.password = ''
+      return
+    }
     const proxy = props.proxy
     model.name = proxy?.name ?? ''
     model.type = proxy?.type ?? 'HTTP'
@@ -245,6 +272,36 @@ function isValidHealthcheckUrl(value: string): boolean {
       <NAlert v-if="editing && proxy?.assignedProfileCount" type="info" class="modal-description">{{
         t('runtimeRoute.savedHint')
       }}</NAlert>
+      <section v-if="!editing" class="quick-entry">
+        <label for="proxy-quick-url">{{ t('proxyQuickEntry.title') }}</label>
+        <div class="quick-entry-controls">
+          <NInput
+            v-model:value="quickUrl"
+            type="password"
+            show-password-on="click"
+            :disabled="busy"
+            :maxlength="9000"
+            :placeholder="t('proxyQuickEntry.placeholder')"
+            :input-props="{
+              id: 'proxy-quick-url',
+              autocomplete: 'off',
+              'aria-describedby': 'proxy-quick-hint',
+            }"
+            @update:value="quickStatus = null"
+            @keydown.enter.prevent="applyQuickUrl"
+          />
+          <NButton :disabled="busy || !quickUrl.trim()" @click="applyQuickUrl">{{
+            t('proxyQuickEntry.apply')
+          }}</NButton>
+        </div>
+        <small id="proxy-quick-hint">{{ t('proxyQuickEntry.hint') }}</small>
+        <NAlert
+          v-if="quickStatus"
+          :type="quickStatus === 'invalid' ? 'error' : 'success'"
+          :role="quickStatus === 'invalid' ? 'alert' : 'status'"
+          >{{ t(`proxyQuickEntry.${quickStatus}`) }}</NAlert
+        >
+      </section>
       <NForm ref="form" :model="model" :rules="rules" @submit.prevent="submit">
         <div class="form-grid">
           <NFormItem :label="$t('proxies.editor.name')" path="name">
@@ -379,6 +436,27 @@ function isValidHealthcheckUrl(value: string): boolean {
 </template>
 
 <style scoped>
+.quick-entry {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.quick-entry-controls {
+  display: flex;
+  gap: 8px;
+}
+.quick-entry small {
+  color: var(--bs-text-muted);
+}
+.quick-entry-controls :deep(.n-input) {
+  min-width: 0;
+}
+@media (max-width: 680px) {
+  .quick-entry-controls {
+    flex-direction: column;
+  }
+}
+
 .proxy-editor {
   width: min(700px, calc(100vw - 32px));
   max-height: calc(100vh - 32px);

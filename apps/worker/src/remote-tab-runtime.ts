@@ -1361,8 +1361,8 @@ async function loadRemoteTabPackages(): Promise<RemoteTabPackages> {
     throw new Error('Installed Remote Tab packages do not expose the required Worker runtime API')
   }
   // Older Core releases silently ignore downloadSink and would bypass the business inbox.
-  if (core.REMOTE_TAB_CORE_VERSION !== '0.1.23')
-    throw new Error('Worker advanced media quality requires coordinated Remote Tab Core 0.1.23')
+  if (core.REMOTE_TAB_CORE_VERSION !== '0.1.24')
+    throw new Error('Worker runtime requires coordinated Remote Tab Core 0.1.24')
   return {
     CdpBrowser: core.CdpBrowser as unknown as RemoteTabPackages['CdpBrowser'],
     ExtensionLoopbackServer:

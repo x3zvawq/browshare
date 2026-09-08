@@ -97,10 +97,10 @@ export function loadWorkerConfiguration(
   }
   const expectedExtensionVersion =
     optionalText(environment, 'BROWSHARE_EXPECTED_EXTENSION_VERSION', {
-      defaultValue: '0.1.23',
+      defaultValue: '0.1.24',
       minLength: 1,
       maxLength: 64,
-    }) ?? '0.1.23'
+    }) ?? '0.1.24'
   if (!/^\d+(?:\.\d+){0,3}$/u.test(expectedExtensionVersion)) {
     throw new TypeError('BROWSHARE_EXPECTED_EXTENSION_VERSION must be a Chrome Extension version')
   }
@@ -244,10 +244,10 @@ export function loadWorkerConfiguration(
       }) ?? '152.0.7977.75',
     expectedRemoteTabCoreVersion:
       optionalText(environment, 'BROWSHARE_EXPECTED_REMOTE_TAB_CORE_VERSION', {
-        defaultValue: '0.1.23',
+        defaultValue: '0.1.24',
         minLength: 1,
         maxLength: 64,
-      }) ?? '0.1.23',
+      }) ?? '0.1.24',
     expectedExtensionVersion,
     profileStorageDirectory: resolve(
       optionalText(environment, 'BROWSHARE_WORKER_PROFILE_STORAGE_DIRECTORY', {

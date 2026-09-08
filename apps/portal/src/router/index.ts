@@ -101,16 +101,27 @@ export const router = createRouter({
       meta: { requiresAuth: true, requiredPermission: 'profile.read' },
     },
     {
-      path: '/admin/profiles/:profileId/page-script',
-      name: 'admin-page-script',
-      component: loadPage(() => import('@/views/AdminPageScriptView.vue')),
+      path: '/admin/profiles/:profileId',
+      component: loadPage(() => import('@/views/AdminProfileDetailView.vue')),
       meta: { requiresAuth: true, requiredPermission: 'profile.read' },
-    },
-    {
-      path: '/admin/profiles/:profileId/navigation-policy',
-      name: 'admin-navigation-policy',
-      component: loadPage(() => import('@/views/AdminNavigationPolicyView.vue')),
-      meta: { requiresAuth: true, requiredPermission: 'profile.read' },
+      children: [
+        { path: '', redirect: (to) => ({ name: 'admin-profile-maintenance', params: to.params }) },
+        {
+          path: 'maintenance',
+          name: 'admin-profile-maintenance',
+          component: loadPage(() => import('@/views/AdminProfileMaintenanceView.vue')),
+        },
+        {
+          path: 'page-script',
+          name: 'admin-page-script',
+          component: loadPage(() => import('@/views/AdminPageScriptView.vue')),
+        },
+        {
+          path: 'navigation-policy',
+          name: 'admin-navigation-policy',
+          component: loadPage(() => import('@/views/AdminNavigationPolicyView.vue')),
+        },
+      ],
     },
     {
       path: '/admin/session-policies',

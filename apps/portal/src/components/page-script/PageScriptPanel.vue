@@ -8,7 +8,12 @@ import { useI18n } from 'vue-i18n'
 import PageScriptForm from './PageScriptForm.vue'
 import UserProfileContextPanel from './UserProfileContextPanel.vue'
 import { usePageScriptEditor } from './usePageScriptEditor.js'
-const props = defineProps<{ profileId: string; canManage: boolean; canMaintain: boolean }>()
+const props = defineProps<{
+  profileId: string
+  embedded?: boolean
+  canManage: boolean
+  canMaintain: boolean
+}>()
 const { t } = useI18n()
 const router = useRouter(),
   testing = shallowRef(false)
@@ -44,10 +49,11 @@ const {
   <section class="navigation-page">
     <header>
       <div>
-        <RouterLink to="/admin/profiles">{{ t('pageScript.back') }}</RouterLink>
-        <h1>
-          {{ t('pageScript.title') }}<template v-if="state"> · {{ state.profile.name }}</template>
-        </h1>
+        <RouterLink v-if="!embedded" to="/admin/profiles">{{ t('pageScript.back') }}</RouterLink>
+        <component :is="embedded ? 'h2' : 'h1'">
+          {{ t('pageScript.title')
+          }}<template v-if="state && !embedded"> · {{ state.profile.name }}</template>
+        </component>
         <p>{{ t('pageScript.intro') }}</p>
       </div>
       <NButton :loading="busy" @click="refresh">{{ t('pageScript.refresh') }}</NButton>

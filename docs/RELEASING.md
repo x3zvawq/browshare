@@ -11,7 +11,7 @@
 | Worker 平台 | Linux amd64 |
 | Node / pnpm | 24.12.0 / 10.28.2 |
 | Google Chrome Stable | 152.0.7977.75，deb 152.0.7977.75-1 |
-| Remote Tab / Extension | 0.1.23 / 0.1.23 |
+| Remote Tab / Extension | 0.1.24 / 0.1.24 |
 | Worker Control | 1.22 |
 
 [compatibility.json](../deploy/compatibility.json) 固定 Chrome 下载地址、包校验和、Node 基础镜像

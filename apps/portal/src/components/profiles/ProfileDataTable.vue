@@ -24,6 +24,8 @@ import { storageMessages } from '@/components/storage/messages.js'
 import RuntimeRouteStatus from '@/components/proxies/RuntimeRouteStatus.vue'
 import { proxyRuntimeMessages } from '@/components/proxies/messages.js'
 import ProfileActions from './ProfileActions.vue'
+import ProfileColumnPicker from './ProfileColumnPicker.vue'
+import { useProfileColumns } from './useProfileColumns.js'
 import { profileRuntimeMessages } from './runtime-messages.js'
 
 const props = defineProps<{
@@ -35,7 +37,6 @@ const props = defineProps<{
   readonly requestId: string | undefined
   readonly errorCode: string | undefined
   readonly canManage: boolean
-  readonly canMaintain: boolean
   readonly busyProfileId: string | undefined
   readonly runtimePending: ReadonlySet<string>
 }>()
@@ -67,27 +68,27 @@ const { t } = useI18n({
 })
 const tableData = computed(() => [...props.items])
 
-const columns = computed<DataTableColumns<Profile>>(() => {
+const { selected: selectedColumns, reset: resetColumns } = useProfileColumns()
+const allColumns = computed<DataTableColumns<Profile>>(() => {
   const profileColumns: DataTableColumns<Profile> = [
     {
       title: t('profiles.columns.profile'),
       key: 'profile',
-      width: 270,
+      width: 240,
       render: (profile) =>
         h('div', { class: 'profile-cell' }, [
-          h('strong', profile.name),
-          h('span', profile.description?.trim() || t('profiles.noDescription')),
-          h('small', profile.id),
-          props.canMaintain
-            ? h(RouterLink, { to: { name: 'maintenance', query: { profileId: profile.id } } }, () =>
-                t('maintenance.title'),
-              )
-            : null,
-          h(RouterLink, { to: '/admin/profiles/' + profile.id + '/page-script' }, () =>
-            t('pageScript.title'),
+          h(
+            RouterLink,
+            {
+              to: { name: 'admin-profile-maintenance', params: { profileId: profile.id } },
+              class: 'profile-name',
+            },
+            () => profile.name,
           ),
-          h(RouterLink, { to: '/admin/profiles/' + profile.id + '/navigation-policy' }, () =>
-            t('navigationPolicy.title'),
+          h(
+            'span',
+            { title: profile.description ?? undefined },
+            profile.description?.trim() || t('profiles.noDescription'),
           ),
         ]),
     },
@@ -321,6 +322,7 @@ const columns = computed<DataTableColumns<Profile>>(() => {
       title: t('profiles.columns.actions'),
       key: 'actions',
       width: 180,
+      fixed: 'right',
       render: (profile) =>
         h(ProfileActions, {
           profile,
@@ -337,6 +339,26 @@ const columns = computed<DataTableColumns<Profile>>(() => {
   }
   return profileColumns
 })
+
+const columns = computed(() =>
+  allColumns.value.filter(
+    (column) =>
+      'key' in column &&
+      (column.key === 'profile' ||
+        column.key === 'actions' ||
+        selectedColumns.value.includes(String(column.key))),
+  ),
+)
+const scrollWidth = computed(() =>
+  columns.value.reduce((total, column) => total + Number(column.width ?? 180), 0),
+)
+const columnOptions = computed(() =>
+  allColumns.value.flatMap((column) =>
+    'key' in column && column.key !== 'profile' && column.key !== 'actions'
+      ? [{ key: String(column.key), label: String(column.title) }]
+      : [],
+  ),
+)
 
 function runtimeTagType(
   state: Profile['runtimeState'],
@@ -388,6 +410,14 @@ function capacityProgressStatus(
         </div>
         <p>{{ $t('profiles.listDescription') }}</p>
       </div>
+      <div class="column-picker-action">
+        <ProfileColumnPicker
+          :selected="selectedColumns"
+          :options="columnOptions"
+          @change="selectedColumns = $event"
+          @reset="resetColumns"
+        />
+      </div>
     </div>
 
     <NAlert v-if="error" class="table-alert" type="error" role="alert" :title="error">
@@ -406,7 +436,7 @@ function capacityProgressStatus(
       :data="tableData"
       :loading="loading"
       :row-key="(profile: Profile) => profile.id"
-      :scroll-x="canManage ? 2150 : 1970"
+      :scroll-x="scrollWidth"
       striped
     >
       <template #empty>
@@ -444,7 +474,17 @@ function capacityProgressStatus(
 }
 
 .table-heading {
+  flex-wrap: wrap;
   gap: 13px;
+}
+
+.column-picker-action {
+  margin-left: auto;
+}
+.profile-table :deep(.profile-name) {
+  color: var(--bs-primary);
+  font-weight: 650;
+  overflow-wrap: anywhere;
 }
 
 .table-heading-icon {

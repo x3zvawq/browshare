@@ -6,7 +6,11 @@ import { useI18n } from 'vue-i18n'
 import { storageMessages } from '@/components/storage/messages.js'
 import RuntimeRouteStatus from '@/components/proxies/RuntimeRouteStatus.vue'
 import type { MaintenanceProfile } from '@/api/types.js'
-const props = defineProps<{ profile: MaintenanceProfile; compact?: boolean }>()
+const props = defineProps<{
+  profile: MaintenanceProfile
+  compact?: boolean
+  fromProfileDetail?: boolean
+}>()
 defineEmits<{ start: [] }>()
 const { t, te } = useI18n({ messages: storageMessages })
 const phase = computed(() => {
@@ -21,7 +25,7 @@ const phase = computed(() => {
   <article class="maintenance-card" :class="{ compact }">
     <div class="details">
       <div class="heading">
-        <h2>{{ profile.name }}</h2>
+        <h2>{{ fromProfileDetail ? t('maintenance.title') : profile.name }}</h2>
         <NTag v-if="phase" type="warning" size="small">{{ t(`maintenance.${phase}`) }}</NTag>
         <NTag v-if="profile.businessStatus !== 'ENABLED'" size="small" type="error">{{
           t('maintenance.disabled')
@@ -30,7 +34,7 @@ const phase = computed(() => {
           t(`profiles.runtimeState.${profile.runtimeState}`)
         }}</NTag>
       </div>
-      <p v-if="profile.description">{{ profile.description }}</p>
+      <p v-if="profile.description && !fromProfileDetail">{{ profile.description }}</p>
       <p>{{ t('maintenance.occupancy', { count: profile.activeNormalSessions }) }}</p>
       <p v-if="profile.maintenance">
         {{ t('maintenance.owner', { name: profile.maintenance.ownerName }) }}
@@ -56,7 +60,11 @@ const phase = computed(() => {
       <RouterLink
         v-if="profile.maintenance?.sessionId"
         v-slot="{ href, navigate }"
-        :to="{ name: 'session-viewer', params: { id: profile.maintenance.sessionId } }"
+        :to="{
+          name: 'session-viewer',
+          params: { id: profile.maintenance.sessionId },
+          query: fromProfileDetail ? { from: 'profile-detail' } : {},
+        }"
         custom
       >
         <NButton tag="a" :href="href" type="primary" secondary @click="navigate">{{

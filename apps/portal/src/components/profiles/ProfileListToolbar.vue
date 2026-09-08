@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CloseCircleOutline, RefreshOutline, SearchOutline } from '@vicons/ionicons5'
+import { CloseCircleOutline, SearchOutline } from '@vicons/ionicons5'
 import { NButton, NIcon, NInput, NSelect, type SelectOption } from 'naive-ui'
 import { computed, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -27,7 +27,6 @@ const emit = defineEmits<{
   workerId: [value: string | null]
   groupId: [value: string | null]
   clear: []
-  refresh: []
 }>()
 
 const { t } = useI18n()
@@ -141,14 +140,10 @@ function clearSearch(): void {
       @update:value="$emit('groupId', $event as string | null)"
     />
 
-    <div class="toolbar-actions">
+    <div v-if="hasActiveFilters" class="toolbar-actions">
       <NButton v-if="hasActiveFilters" quaternary @click="$emit('clear')">
         <template #icon><NIcon aria-hidden="true" :component="CloseCircleOutline" /></template>
         {{ $t('profiles.filters.clearAction') }}
-      </NButton>
-      <NButton :loading="loading" @click="$emit('refresh')">
-        <template #icon><NIcon aria-hidden="true" :component="RefreshOutline" /></template>
-        {{ $t('common.refresh') }}
       </NButton>
     </div>
   </form>

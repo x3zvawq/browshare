@@ -11,6 +11,7 @@ import LiveUpdateStatus from '@/components/status/LiveUpdateStatus.vue'
 import RequestError from '@/components/workspace/RequestError.vue'
 import MaintenanceProfileCard from './MaintenanceProfileCard.vue'
 import MaintenanceStartModal from './MaintenanceStartModal.vue'
+const props = defineProps<{ profileId?: string; embedded?: boolean }>()
 const { t } = useI18n(),
   route = useRoute(),
   router = useRouter()
@@ -18,7 +19,9 @@ const search = shallowRef(''),
   selectedId = shallowRef<string | null>(null)
 const query = computed(() => ({
   search: search.value.trim(),
-  profileId: typeof route.query.profileId === 'string' ? route.query.profileId : undefined,
+  profileId:
+    props.profileId ??
+    (typeof route.query.profileId === 'string' ? route.query.profileId : undefined),
 }))
 const { items, loading, error, nextCursor, refresh, more, liveState, lastReadAt, refreshLive } =
   usePagedCollection(
@@ -47,19 +50,23 @@ function closeModal() {
 }
 function created(session: TabSession) {
   selectedId.value = null
-  void router.push({ name: 'session-viewer', params: { id: session.id } })
+  void router.push({
+    name: 'session-viewer',
+    params: { id: session.id },
+    ...(props.embedded ? { query: { from: 'profile-detail' } } : {}),
+  })
 }
 </script>
 <template>
   <section class="maintenance-panel">
-    <header>
+    <header v-if="!embedded">
       <div>
         <h1>{{ t('maintenance.title') }}</h1>
         <p>{{ t('maintenance.intro') }}</p>
       </div>
       <NButton :loading="loading" @click="refresh">{{ t('workspace.refresh') }}</NButton>
     </header>
-    <div class="toolbar">
+    <div v-if="!embedded" class="toolbar">
       <NInput
         v-if="!query.profileId"
         v-model:value="search"
@@ -74,6 +81,7 @@ function created(session: TabSession) {
     </div>
     <RequestError v-if="error" :error="error" />
     <LiveUpdateStatus
+      v-if="!embedded"
       :state="liveState"
       :last-read-at="lastReadAt"
       :busy="loading"
@@ -85,6 +93,7 @@ function created(session: TabSession) {
       v-for="profile in items"
       :key="profile.id"
       :profile="profile"
+      :from-profile-detail="embedded"
       @start="selectedId = profile.id"
     />
     <NButton v-if="nextCursor" :loading="loading" @click="more">{{ t('workspace.more') }}</NButton>

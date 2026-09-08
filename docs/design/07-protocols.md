@@ -878,3 +878,13 @@ Backend在现有Session行锁下验证Worker、instance、Profile、Runtime、ge
 `audit_events`在同一事务写入，不增加数据库迁移。摘要只含固定码、版本、Session/Profile/Worker
 身份和发生时间；不记录异常正文、URL、源码、上下文或输入。旧Worker不报告该摘要，混合版本
 部署不能据此认定脚本没有错误；首次观察未送达前Worker硬退出不提供持久投递保证。
+
+## 远端指针反馈（Remote Tab 0.1.24）
+
+Backend 创建 Session 时，仅在 Worker 的实际能力报告包含 `cursorFeedback` 时将它加入
+该 Session 的授权能力快照。Viewer ticket、Gateway 和 Worker 沿用现有 capabilities 数组；
+Worker Control 的消息结构没有变化，版本仍为 1.22。Remote Tab 在协议 1.5 协商后提供指针
+反馈，较旧 Viewer 不接收新消息。BrowShare 不读取网页元素或复制指针协议实现。
+
+指针只反映当前可操作窗口的标准 CSS 指针形状，不携带页面文本、输入值或自定义指针资源
+URL。视频画面、输入授权、窗口切换和 viewport 确认仍由 Remote Tab 的既有边界负责。

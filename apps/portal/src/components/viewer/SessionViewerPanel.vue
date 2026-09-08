@@ -49,7 +49,12 @@ const backToScript = computed(
 const backTarget = computed(() =>
   backToScript.value && session.value
     ? { name: 'admin-page-script', params: { profileId: session.value.profileId } }
-    : { name: maintenance.value ? 'maintenance' : 'my-sessions' },
+    : maintenance.value &&
+        route.query.from === 'profile-detail' &&
+        session.value &&
+        auth.user?.permissions.includes('profile.read')
+      ? { name: 'admin-profile-maintenance', params: { profileId: session.value.profileId } }
+      : { name: maintenance.value ? 'maintenance' : 'my-sessions' },
 )
 const backLabel = computed(() =>
   backToScript.value

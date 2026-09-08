@@ -14,7 +14,7 @@ import type {
 import { usePagedCollection } from '@/composables/usePagedCollection.js'
 import RuleEditor from './RuleEditor.vue'
 import PolicyPreview from './PolicyPreview.vue'
-const props = defineProps<{ profileId: string; canManage: boolean }>()
+const props = defineProps<{ profileId: string; embedded?: boolean; canManage: boolean }>()
 const { t } = useI18n(),
   dialog = useDialog(),
   message = useMessage()
@@ -216,11 +216,13 @@ void refresh()
   <section class="navigation-page">
     <header>
       <div>
-        <RouterLink to="/admin/profiles">{{ t('navigationPolicy.back') }}</RouterLink>
-        <h1>
+        <RouterLink v-if="!embedded" to="/admin/profiles">{{
+          t('navigationPolicy.back')
+        }}</RouterLink>
+        <component :is="embedded ? 'h2' : 'h1'">
           {{ t('navigationPolicy.title')
-          }}<template v-if="state"> · {{ state.profile.name }}</template>
-        </h1>
+          }}<template v-if="state && !embedded"> · {{ state.profile.name }}</template>
+        </component>
         <p>{{ t('navigationPolicy.intro') }}</p>
       </div>
       <NButton :loading="busy" @click="refresh">{{ t('navigationPolicy.refresh') }}</NButton>

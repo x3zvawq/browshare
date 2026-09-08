@@ -89,7 +89,7 @@ Linux 宿主先完成控制面初始化，在管理界面签发 Worker Enrollmen
 pnpm worker:image:build browshare/worker:local
 node tools/prepare-worker-deployment.mjs \
   --directory ./tmp/development-deployment \
-  --crx /absolute/path/browshare-remote-tab-0.1.23.crx \
+  --crx /absolute/path/browshare-remote-tab-0.1.24.crx \
   --extension-id <signed-extension-id> \
   --enrollment-token-file /private/path/enrollment-token \
   --image browshare/worker:local
@@ -395,7 +395,7 @@ node tools/prepare-worker-deployment.mjs \
   --files-private-key /private/tls/files-a-key.pem \
   --project browshare-worker-a --bind-address 0.0.0.0 \
   --image browshare/worker:local --ingress-image browshare/portal:local \
-  --crx /private/release/browshare-remote-tab-0.1.23.crx \
+  --crx /private/release/browshare-remote-tab-0.1.24.crx \
   --extension-id <signed-extension-id> \
   --enrollment-token-file /private/enrollment-token
 docker compose --env-file /private/deployment/worker-a/.env \

@@ -23,10 +23,10 @@
     "chromeNamespaceSyscalls": ["clone", "clone3", "setns", "unshare"]
   },
   "remoteTab": {
-    "releaseVersion": "0.1.23",
+    "releaseVersion": "0.1.24",
     "extension": {
-      "version": "0.1.23",
-      "artifactName": "browshare-remote-tab-0.1.23.crx",
+      "version": "0.1.24",
+      "artifactName": "browshare-remote-tab-0.1.24.crx",
       "delivery": "read-only-mount",
       "releaseDirectory": "/opt/browshare/extension-release",
       "managedPolicyPath": "/var/lib/browshare/chrome-policy/browshare-remote-tab.json"

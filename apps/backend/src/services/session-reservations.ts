@@ -295,6 +295,7 @@ export class SessionReservationService {
         'noticeRequests',
         'navigationConfirmation',
         'navigationState',
+        ...(supportedCapabilities.includes('cursorFeedback') ? ['cursorFeedback'] : []),
         'fullscreen',
         'qualityControl',
         'advancedQuality',
