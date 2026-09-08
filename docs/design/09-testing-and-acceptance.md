@@ -560,6 +560,24 @@ Node UID 1000 在与正式镜像相同的 `WORKDIR /app` 下，原 COPY 报 `EAC
 配套 Remote Tab `968a66092edff2de72f36055ec97a08c4b473f47` 的完整检查及源码候选生成；
 本次 push 的可选五镜像 job 为 skipped，完整 Portal 镜像部署结果单独记录。
 
+SVG 品牌更新再次在 `umask 077` 的正式源码构建中发现静态资源读取边界：Vite 的
+`public/` 复制保留源 SVG 的 `0600` 权限，非 root Nginx 的图标请求返回 403。
+修复提交 `d13cd9e38b3851e5adf2ddf3df0651fda05aa712` 在 Portal 最终镜像中将静态目录
+设为 `0755`、文件设为 `0644`，范围仅为 `/usr/share/nginx/html`，不改变运行用户或 Secret。
+
+同一严格检出条件下，与 Remote Tab `81ef000692a1bf41b9e23428e94431219a6407f6` 配对重建的
+Portal `browshare/portal:brand-d13cd9e-81ef000` 已实际部署：源 SVG 仍为 `0600`，镜像内
+静态文件及目录权限正确，HTTPS SVG、CSS 和 LoginView 脚本请求通过，SVG 字节与源码一致。
+保留原六服务、其他镜像、卷及 Worker 身份，构建器已停止。两份源码均通过各自托管 CI；
+本轮完整镜像实测范围是 Portal，未将其他镜像称为已重建。
+
+本机 Google Chrome Stable 使用独立 Profile、测试域名映射和当前 leaf 的临时 SPKI 例外，
+直接连接测试服务器并完成登录、Worker 在线/可调度观察、SVG/favicon 加载、深浅色和中英文切换，
+1440px 与 390px 页面无横向溢出。退出后，同一浏览器 Profile 访问受保护入口回到登录页；
+测试浏览器及本地预览服务均已关闭。本轮未创建媒体 Session，既有媒体验收范围保持不变。
+构建、失败对照、权限与 HTTP 证据位于忽略的 `tmp/brand-deploy-qa/`，页面证据位于
+`tmp/brand-refresh/`；使用说明与私密账号位于 `tmp/manual-review/`。
+
 ### Portal 采用修正后的公共媒体客户端（2026-09-08）
 
 从 clean 公开提交 BrowShare `5fa3c388d7e779a236cb70253b623c2b1175a300` 与 Remote Tab
