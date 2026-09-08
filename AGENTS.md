@@ -13,7 +13,7 @@ BrowShare 是单租户、自托管的共享浏览器工作区。Profile 是固�
 ## 按任务读取
 
 - [README](README.md) 提供运行入口，[PROGRESS.md](PROGRESS.md) 记录交付状态；只读与当前任务有关的条目及证据。
-- [系统架构](docs/design/02-architecture.md)、[领域模型](docs/design/03-domain-model.md) 解释职责和状态；[设计文档索引](README.md#阅读文档) 指向各专题。
+- [系统架构](docs/design/02-architecture.md)、[领域模型](docs/design/03-domain-model.md) 解释职责和状态；[设计文档索引](docs/README.md) 指向各专题。
 - UI 任务读取 [页面设计](docs/DESIGN.md)；协议任务读取 [接口与协议](docs/design/07-protocols.md) 并核对实际 schema 和调用方。
 - 设计描述目标契约，代码和测试说明当前行为，进度记录已完成的交付；发现差异时明确指出，并在当前任务范围内同步。不要把阶段计划当作当前停工指令，或把历史测试记录当作本次验证。
 - 只在变更跨越公共边界时读取、修改相邻仓库；仓库位置以实际工作区为准，不假定所有 checkout 都有同级副本。
