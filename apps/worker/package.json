@@ -13,7 +13,7 @@
     "browshare-worker": "./dist/cli.mjs"
   },
   "scripts": {
-    "build": "tsdown src/index.ts src/cli.ts src/profile-chrome-supervisor.mjs --format esm --dts --clean",
+    "build": "tsdown src/index.ts src/cli.ts src/profile-chrome-supervisor.mjs src/profile-chrome-fonts.mjs --format esm --dts --clean",
     "dev": "tsx watch src/cli.ts",
     "start": "node dist/cli.mjs",
     "typecheck": "tsc -p tsconfig.json"

@@ -59,6 +59,7 @@ const backLabel = computed(() =>
       : 'workspace.mySessions',
 )
 
+const immersive = shallowRef(false)
 const mediaState = shallowRef('ATTACHING'),
   viewerError = shallowRef('')
 const starting = computed(
@@ -90,8 +91,8 @@ async function retry(generation?: number) {
 }
 </script>
 <template>
-  <section class="viewer-page">
-    <header class="viewer-header">
+  <section class="viewer-page" :class="{ immersive }">
+    <header v-show="!immersive" class="viewer-header">
       <RouterLink class="back" :to="backTarget">← {{ t(backLabel) }}</RouterLink>
       <div class="session-heading">
         <strong :title="session ? sessionName(session) : undefined">{{
@@ -121,6 +122,7 @@ async function retry(generation?: number) {
       >
     </header>
     <LiveUpdateStatus
+      v-show="!immersive"
       viewer
       :state="liveState"
       :last-read-at="lastReadAt"
@@ -132,7 +134,16 @@ async function retry(generation?: number) {
         t('workspace.refresh')
       }}</NButton>
     </div>
-    <div v-if="session && !isSessionTerminal(session)" class="business-message">
+    <div
+      v-if="session && !isSessionTerminal(session)"
+      v-show="
+        !immersive ||
+        !!session.storageBlockedReason ||
+        session.restartRequired ||
+        session.runtimeProxyHealth?.status === 'UNHEALTHY'
+      "
+      class="business-message"
+    >
       <StorageBlockNotice
         :reason="session.storageBlockedReason"
         :pending="session.storagePolicyPending"
@@ -207,8 +218,9 @@ async function retry(generation?: number) {
         @close="session && confirm(session)"
         @state="onMediaState"
         @error="onViewerError"
+        @immersive="immersive = $event"
       />
-      <footer class="viewer-footer">
+      <footer v-show="!immersive" class="viewer-footer">
         <span>{{ t('workspace.connectionLabel') }}: {{ mediaState }}</span
         ><span>{{ t(maintenance ? 'maintenance.leaveHint' : 'workspace.leaveHint') }}</span>
       </footer></template
@@ -233,6 +245,10 @@ async function retry(generation?: number) {
   min-height: 540px;
   background: var(--bs-canvas);
   color: var(--bs-text);
+}
+.viewer-page.immersive {
+  min-height: 0;
+  --bs-viewer-min-height: 0px;
 }
 .viewer-header {
   display: flex;

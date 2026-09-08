@@ -10,6 +10,7 @@ export function useMaintenanceStart(
 ) {
   const { t } = useI18n()
   const profile = shallowRef<MaintenanceProfile | null>(null)
+  let urlEdited = false
   const url = shallowRef(''),
     busy = shallowRef(false),
     loading = shallowRef(false)
@@ -35,6 +36,8 @@ export function useMaintenanceStart(
         signal: controller.signal,
       })
       if (!result.data) throw apiFailure(result.error, result.response)
+      // Only seed the first successful load; refresh must preserve an edited or cleared URL.
+      if (profile.value === null && !urlEdited) url.value = result.data.defaultInitialUrl ?? ''
       profile.value = result.data
       contextError.value = null
     } catch (cause) {
@@ -42,6 +45,10 @@ export function useMaintenanceStart(
     } finally {
       loading.value = false
     }
+  }
+  function updateUrl(value: string) {
+    urlEdited = true
+    url.value = value
   }
   async function create() {
     if (!canStart.value) return
@@ -80,5 +87,17 @@ export function useMaintenanceStart(
   }
   void refresh()
   onScopeDispose(() => controller.abort())
-  return { profile, url, busy, loading, validation, error, contextError, canStart, refresh, create }
+  return {
+    profile,
+    url,
+    updateUrl,
+    busy,
+    loading,
+    validation,
+    error,
+    contextError,
+    canStart,
+    refresh,
+    create,
+  }
 }

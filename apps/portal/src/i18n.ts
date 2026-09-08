@@ -399,8 +399,9 @@ export const i18n = createI18n({
           directConnection: 'Direct（使用 Worker 默认出口）',
           proxyDescription: 'Proxy 配置修改后，下次启动 Profile 时生效。',
           healthcheckUrl: '启动检查地址（HTTPS）',
+          healthcheckRequired: '请填写启动检查地址；Profile 启动前必须完成网络检查。',
           healthcheckDescription:
-            '填写该 Profile 可访问的业务 HTTPS 地址。启动前会通过所选出口检查；留空可保存配置，但不能启动。修改地址或出口后需停止并重新启动。',
+            '填写可访问的业务 HTTPS 地址（例如网站首页），无需以 /health 结尾。启动前会通过所选出口检查；维护会话默认打开此地址，可在进入前修改。修改地址或出口后需停止并重新启动。',
           runtimeMode: '运行模式',
           idleTimeout: '空闲停止延迟（秒）',
           idleHint: '最后一个 Session 结束后开始计时；0 表示立即停止。数据会保留。',
@@ -440,6 +441,8 @@ export const i18n = createI18n({
             generic: 'Profile 操作失败，请稍后重试',
           },
         },
+        more: '更多',
+        moreLabel: '{name} 的更多操作',
         runtime: {
           alwaysOnStop: '请先禁用常驻 Profile 或切换运行模式',
           recoveryWaiting: '启动失败 {count}/5，等待自动重试',
@@ -1042,8 +1045,10 @@ export const i18n = createI18n({
           directConnection: 'Direct (use the Worker default egress)',
           proxyDescription: 'Proxy configuration changes apply the next time the Profile starts.',
           healthcheckUrl: 'Startup check URL (HTTPS)',
+          healthcheckRequired:
+            'Enter a startup check URL. A network check is required before this Profile can start.',
           healthcheckDescription:
-            'Use a business HTTPS URL reachable by this Profile. Startup checks the selected egress. You may save an empty URL, but startup requires one. Stop and start again after changing the URL or egress.',
+            'Enter a reachable business HTTPS URL, such as its home page; /health is not required. Startup checks the selected egress. Maintenance Sessions prefill this address and let you change it. Stop and start again after changing the URL or egress.',
           runtimeMode: 'Runtime mode',
           idleTimeout: 'Idle stop delay (seconds)',
           idleHint:
@@ -1084,6 +1089,8 @@ export const i18n = createI18n({
             generic: 'The Profile operation failed. Please try again',
           },
         },
+        more: 'More',
+        moreLabel: 'More actions for {name}',
         runtime: {
           alwaysOnStop: 'Disable this always-on Profile or change its run mode first',
           recoveryWaiting: 'Startup failures {count}/5; automatic retry pending',

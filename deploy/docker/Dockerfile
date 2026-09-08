@@ -134,7 +134,7 @@ USER root
 RUN test "$(dpkg --print-architecture)" = amd64 \
   && apt-get update \
   && apt-get upgrade --yes --no-install-recommends \
-  && apt-get install --yes --no-install-recommends ca-certificates curl fonts-liberation tini \
+  && apt-get install --yes --no-install-recommends ca-certificates curl fontconfig fonts-liberation tini unzip \
   && curl --fail --show-error --silent --location "$GOOGLE_CHROME_DEB_URL" --output /tmp/google-chrome.deb \
   && echo "$GOOGLE_CHROME_DEB_SHA256  /tmp/google-chrome.deb" | sha256sum --check --strict \
   && apt-get install --yes --no-install-recommends /tmp/google-chrome.deb \
@@ -150,6 +150,10 @@ RUN test "$(dpkg --print-architecture)" = amd64 \
     /opt/yarn-v1.22.22 \
   && rm -f /usr/local/bin/corepack /usr/local/bin/npm /usr/local/bin/npx \
     /usr/local/bin/pnpm /usr/local/bin/pnpx /usr/local/bin/yarn /usr/local/bin/yarnpkg
+
+COPY --chmod=0644 deploy/docker/50-maple-mono.conf /etc/fonts/conf.d/50-maple-mono.conf
+COPY --chmod=0755 deploy/docker/install-maple-font.sh /usr/local/lib/browshare/install-maple-font.sh
+RUN /usr/local/lib/browshare/install-maple-font.sh
 
 RUN install -d -o root -g root -m 0755 \
     /etc/opt/chrome/policies/managed \

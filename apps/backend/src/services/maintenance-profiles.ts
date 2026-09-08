@@ -136,6 +136,7 @@ export class MaintenanceProfileService {
       blockedReason = 'WORKER_UNAVAILABLE'
     else if (live.protocolMinor === null || live.protocolMinor < 19)
       blockedReason = 'WORKER_PROTOCOL_INCOMPATIBLE'
+    else if (row.healthcheckUrl === null) blockedReason = 'PROFILE_HEALTHCHECK_REQUIRED'
     else if (
       !['RUNNING', 'STOPPED', 'STARTING', 'ERROR'].includes(row.runtimeState) ||
       (row.runtimeDesiredState === 'STOPPED' && row.runtimeState !== 'STOPPED') ||
@@ -143,7 +144,6 @@ export class MaintenanceProfileService {
       row.storageBlockedReason !== null
     )
       blockedReason = 'PROFILE_NOT_READY'
-    else if (row.healthcheckUrl === null) blockedReason = 'PROFILE_HEALTHCHECK_REQUIRED'
     return {
       id: row.id,
       name: row.name,
@@ -157,6 +157,7 @@ export class MaintenanceProfileService {
       restartRequired:
         row.runtimeRouteVersion !== null && row.runtimeRouteVersion !== row.routeVersion,
       runtimeMode: row.runtimeMode,
+      defaultInitialUrl: row.healthcheckUrl,
       activeNormalSessions: row.activeNormalSessions,
       createdAt: new Date(row.createdAt).toISOString(),
       blockedReason,

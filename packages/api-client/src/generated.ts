@@ -11540,6 +11540,7 @@ export interface operations {
                             runtimeState: "STOPPED" | "STARTING" | "RUNNING" | "MAINTAINING" | "STOPPING" | "ERROR";
                             /** @enum {unknown} */
                             runtimeMode: "ALWAYS_ON" | "ON_DEMAND" | "MANUAL";
+                            defaultInitialUrl: string | null;
                             activeNormalSessions: number;
                             blockedReason: ("PROFILE_MAINTENANCE_ACTIVE" | "PROFILE_DISABLED" | "PROFILE_NOT_READY" | "PROFILE_HEALTHCHECK_REQUIRED" | "WORKER_UNAVAILABLE" | "WORKER_PROTOCOL_INCOMPATIBLE") | null;
                             maintenance: {
@@ -11718,6 +11719,7 @@ export interface operations {
                         runtimeState: "STOPPED" | "STARTING" | "RUNNING" | "MAINTAINING" | "STOPPING" | "ERROR";
                         /** @enum {unknown} */
                         runtimeMode: "ALWAYS_ON" | "ON_DEMAND" | "MANUAL";
+                        defaultInitialUrl: string | null;
                         activeNormalSessions: number;
                         blockedReason: ("PROFILE_MAINTENANCE_ACTIVE" | "PROFILE_DISABLED" | "PROFILE_NOT_READY" | "PROFILE_HEALTHCHECK_REQUIRED" | "WORKER_UNAVAILABLE" | "WORKER_PROTOCOL_INCOMPATIBLE") | null;
                         maintenance: {

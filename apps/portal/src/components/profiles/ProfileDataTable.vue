@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import {
-  AlertCircleOutline,
-  CreateOutline,
-  LayersOutline,
-  PowerOutline,
-  TrashOutline,
-} from '@vicons/ionicons5'
+import { AlertCircleOutline, LayersOutline } from '@vicons/ionicons5'
 import {
   NAlert,
   NButton,
@@ -29,6 +23,7 @@ import ProfileStorageStatus from '@/components/storage/ProfileStorageStatus.vue'
 import { storageMessages } from '@/components/storage/messages.js'
 import RuntimeRouteStatus from '@/components/proxies/RuntimeRouteStatus.vue'
 import { proxyRuntimeMessages } from '@/components/proxies/messages.js'
+import ProfileActions from './ProfileActions.vue'
 import { profileRuntimeMessages } from './runtime-messages.js'
 
 const props = defineProps<{
@@ -325,127 +320,19 @@ const columns = computed<DataTableColumns<Profile>>(() => {
     profileColumns.push({
       title: t('profiles.columns.actions'),
       key: 'actions',
-      width: 650,
-      render: (profile) => {
-        const deletionPending = profile.deleteRequestedAt !== null
-        const busy = props.busyProfileId === profile.id
-        const runtimeBusy = props.runtimePending.has(profile.id)
-        const startBlocked =
-          !!profile.storageBlockedReason ||
-          deletionPending ||
-          profile.businessStatus !== 'ENABLED' ||
-          profile.worker.state !== 'ONLINE' ||
-          !['STOPPED', 'ERROR'].includes(profile.runtimeState) ||
-          !profile.healthcheckUrl ||
-          profile.capacity.activeSessions > 0
-        const stopBlocked =
-          (profile.runtimeMode === 'ALWAYS_ON' && profile.businessStatus === 'ENABLED') ||
-          deletionPending ||
-          !['ONLINE', 'DRAINING'].includes(profile.worker.state) ||
-          ['STOPPED', 'STOPPING', 'MAINTAINING'].includes(profile.runtimeState) ||
-          profile.capacity.activeSessions > 0
-        return h(NSpace, { size: 4, wrap: false }, () => [
-          h(
-            NButton,
-            {
-              size: 'small',
-              quaternary: true,
-              disabled: deletionPending || busy,
-              'aria-label': t('profileGroups.grantsLabel', { name: profile.name }),
-              onClick: () => emit('grants', profile),
-            },
-            () => t('profileGroups.grants'),
-          ),
-          h(
-            NButton,
-            {
-              size: 'small',
-              type: 'primary',
-              secondary: true,
-              loading: runtimeBusy,
-              disabled: startBlocked || busy,
-              title: !profile.healthcheckUrl
-                ? t('profiles.runtime.configureHealthcheck')
-                : undefined,
-              'aria-label': t('profiles.runtime.startLabel', { name: profile.name }),
-              onClick: () => emit('setRuntime', profile, 'START'),
-            },
-            () => t('profiles.runtime.start'),
-          ),
-          h(
-            NButton,
-            {
-              size: 'small',
-              secondary: true,
-              disabled: stopBlocked || busy || runtimeBusy,
-              'aria-label': t('profiles.runtime.stopLabel', { name: profile.name }),
-              title:
-                profile.runtimeMode === 'ALWAYS_ON' && profile.businessStatus === 'ENABLED'
-                  ? t('profiles.runtime.alwaysOnStop')
-                  : undefined,
-              onClick: () => emit('setRuntime', profile, 'STOP'),
-            },
-            () => t('profiles.runtime.stop'),
-          ),
-          h(
-            NButton,
-            {
-              size: 'small',
-              secondary: true,
-              type: 'error',
-              disabled: !profile.runtimeRecovery.canRecover || busy || runtimeBusy,
-              'aria-label': t('runtimeRecovery.actionLabel', { name: profile.name }),
-              title: profile.runtimeRecovery.blockedReason
-                ? t(`runtimeRecovery.blocks.${profile.runtimeRecovery.blockedReason}`)
-                : undefined,
-              onClick: () => emit('recoverRuntime', profile),
-            },
-            () => t('runtimeRecovery.action'),
-          ),
-          h(
-            NButton,
-            {
-              size: 'small',
-              quaternary: true,
-              disabled: deletionPending || busy,
-              onClick: () => emit('edit', profile),
-            },
-            {
-              icon: () => h(NIcon, { component: CreateOutline, 'aria-hidden': true }),
-              default: () => t('common.edit'),
-            },
-          ),
-          h(
-            NButton,
-            {
-              size: 'small',
-              quaternary: true,
-              loading: busy,
-              disabled: deletionPending,
-              onClick: () => emit('toggleState', profile),
-            },
-            {
-              icon: () => h(NIcon, { component: PowerOutline, 'aria-hidden': true }),
-              default: () =>
-                profile.businessStatus === 'ENABLED' ? t('common.disable') : t('common.enable'),
-            },
-          ),
-          h(
-            NButton,
-            {
-              size: 'small',
-              quaternary: true,
-              type: 'error',
-              disabled: deletionPending || busy,
-              onClick: () => emit('delete', profile),
-            },
-            {
-              icon: () => h(NIcon, { component: TrashOutline, 'aria-hidden': true }),
-              default: () => t('common.delete'),
-            },
-          ),
-        ])
-      },
+      width: 180,
+      render: (profile) =>
+        h(ProfileActions, {
+          profile,
+          busy: props.busyProfileId === profile.id,
+          runtimeBusy: props.runtimePending.has(profile.id),
+          onEdit: (item) => emit('edit', item),
+          onGrants: (item) => emit('grants', item),
+          onSetRuntime: (item, action) => emit('setRuntime', item, action),
+          onRecoverRuntime: (item) => emit('recoverRuntime', item),
+          onToggleState: (item) => emit('toggleState', item),
+          onDelete: (item) => emit('delete', item),
+        }),
     })
   }
   return profileColumns
@@ -519,7 +406,7 @@ function capacityProgressStatus(
       :data="tableData"
       :loading="loading"
       :row-key="(profile: Profile) => profile.id"
-      :scroll-x="canManage ? 2620 : 1970"
+      :scroll-x="canManage ? 2150 : 1970"
       striped
     >
       <template #empty>

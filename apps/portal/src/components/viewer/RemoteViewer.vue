@@ -15,7 +15,12 @@ const props = defineProps<{
     focusPolicy: SessionViewerLaunch['focusPolicy']
   }>
 }>()
-const emit = defineEmits<{ close: []; state: [state: string]; error: [code: string] }>()
+const emit = defineEmits<{
+  close: []
+  state: [state: string]
+  error: [code: string]
+  immersive: [value: boolean]
+}>()
 const container = useTemplateRef<HTMLDivElement>('container')
 let viewer: RemoteTabViewerElement | undefined
 const listeners = new AbortController()
@@ -33,6 +38,15 @@ onMounted(() => {
       return { ticket: connection.ticket, endpoint: connection.endpoint }
     },
   }
+  viewer.addEventListener(
+    'immersive-change',
+    (event) =>
+      emit(
+        'immersive',
+        (event as CustomEvent<RemoteTabViewerEventDetailMap['immersive-change']>).detail.immersive,
+      ),
+    { signal: listeners.signal },
+  )
   viewer.addEventListener('session-close-request', () => emit('close'), {
     signal: listeners.signal,
   })
@@ -63,6 +77,7 @@ watch(
 )
 onBeforeUnmount(() => {
   listeners.abort()
+  emit('immersive', false)
   // The element owns capture controls, PeerConnection and transfer teardown on removal.
   viewer?.remove()
   viewer = undefined
@@ -73,7 +88,7 @@ onBeforeUnmount(() => {
 .remote-viewer {
   flex: 1;
   display: flex;
-  min-height: 420px;
+  min-height: var(--bs-viewer-min-height, 420px);
   min-width: 0;
 }
 .remote-viewer :deep(browshare-tab-viewer) {

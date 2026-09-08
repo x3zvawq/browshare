@@ -9,8 +9,19 @@ import { useMaintenanceStart } from './useMaintenanceStart.js'
 const props = defineProps<{ profileId: string; pageScriptVersionId?: string }>()
 const emit = defineEmits<{ close: []; created: [session: TabSession] }>()
 const { t } = useI18n()
-const { profile, url, busy, loading, validation, error, contextError, canStart, refresh, create } =
-  useMaintenanceStart(props, (session) => emit('created', session))
+const {
+  profile,
+  url,
+  updateUrl,
+  busy,
+  loading,
+  validation,
+  error,
+  contextError,
+  canStart,
+  refresh,
+  create,
+} = useMaintenanceStart(props, (session) => emit('created', session))
 </script>
 <template>
   <FormModal
@@ -33,7 +44,7 @@ const { profile, url, busy, loading, validation, error, contextError, canStart, 
           v-bind="validation ? { validationStatus: 'error' as const } : {}"
         >
           <NInput
-            v-model:value="url"
+            :value="url"
             placeholder="https://example.com"
             :disabled="busy"
             :input-props="{
@@ -42,6 +53,7 @@ const { profile, url, busy, loading, validation, error, contextError, canStart, 
               autocomplete: 'url',
               'aria-label': t('workspace.initialUrl'),
             }"
+            @update:value="updateUrl"
             @keydown.enter.prevent="create"
           /> </NFormItem
       ></NForm>

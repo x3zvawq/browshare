@@ -1372,6 +1372,7 @@ export const MaintenanceProfileSchema = Type.Object(
     businessStatus: ProfileResponseSchema.properties.businessStatus,
     runtimeState: ProfileResponseSchema.properties.runtimeState,
     runtimeMode: ProfileResponseSchema.properties.runtimeMode,
+    defaultInitialUrl: Type.Union([Type.String({ maxLength: 2048 }), Type.Null()]),
     activeNormalSessions: Type.Integer({ minimum: 0 }),
     blockedReason: Type.Union([MaintenanceBlockReasonSchema, Type.Null()]),
     maintenance: Type.Union([

@@ -17,5 +17,23 @@ container base distributions, fonts, or Google Chrome.
 - A signed Remote Tab Extension requires an authorized, stable signing key. Signing keys, enrollment
   tokens, TLS secrets, Profile data and test credentials are never release artifacts.
 
+## Maple Mono CN
+
+The Worker image installs the unmodified Regular, Bold, Italic and Bold Italic fonts from
+[Maple Mono CN v7.9](https://github.com/subframe7536/maple-font/releases/tag/v7.9), by the
+Maple Mono Project Authors, under the SIL Open Font License 1.1. Its Chinese and Japanese
+glyphs derive from Resource Han Rounded, as documented by upstream. The fixed archive SHA-256
+is `cb1e79b2c23dff772ae351784ef2b84454a61b3920e9b20bd5db4bf207e4472d`.
+The complete upstream copyright and license accompany the fonts in the image at
+`/usr/share/doc/maple-mono-cn/LICENSE.txt`; retain them when redistributing the font files.
+The OFL permits bundling and redistribution with software, subject to its terms, including
+retaining the license and not selling the fonts on their own. This does not change Chrome's
+separate distribution conditions above.
+
+Chrome's default standard, serif, sans-serif and fixed families use Maple Mono CN. Explicit
+website CSS families and web fonts remain in control of their own text. Fontconfig retains
+fallback selection for glyphs not included in Maple Mono CN; no font here promises every
+Unicode character.
+
 SBOM tools report detected metadata. Resolve missing or ambiguous license metadata before distributing
 an affected artifact; a successful build or scan is not a legal determination.

@@ -105,16 +105,17 @@ const runtimeModeOptions = computed<SelectOption[]>(() => [
 
 const rules: FormRules = {
   healthcheckUrl: {
+    required: true,
     validator: (_rule, value: string) => {
-      if (!value.trim()) return true
+      if (!value.trim()) return new Error(t('profiles.editor.healthcheckRequired'))
       try {
         const url = new URL(value.trim())
-        return url.protocol === 'https:' && !url.username && !url.password
+        if (url.protocol === 'https:' && !url.username && !url.password) return true
       } catch {
-        return false
+        // The same actionable message covers malformed URLs and unsupported schemes.
       }
+      return new Error(t('profiles.editor.validation.healthcheckUrl'))
     },
-    message: () => t('profiles.editor.validation.healthcheckUrl'),
     trigger: ['blur', 'input'],
   },
   name: {
@@ -285,7 +286,7 @@ function isIntegerInRange(value: unknown, minimum: number, maximum: number): boo
                 v-model:value="model.healthcheckUrl"
                 :disabled="busy"
                 :maxlength="2048"
-                placeholder="https://example.com/health"
+                placeholder="https://example.com/"
                 :input-props="{ 'aria-label': $t('profiles.editor.healthcheckUrl') }"
               />
               <p class="field-description">{{ $t('profiles.editor.healthcheckDescription') }}</p>

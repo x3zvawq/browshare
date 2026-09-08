@@ -559,6 +559,8 @@ Worker在创建入口同步检查Profile内所有Session：维护与其他普通
 维护目录提供`GET /api/v1/maintenance/profiles`（search、cursor、limit）与
 `GET /api/v1/profiles/{id}/maintenance`，均要求`profile.maintain`。响应仅包含操作所需的Profile
 信息、普通Session数量、阻止启动原因和当前维护状态；维护Session ID仅对其所有者返回。
+`defaultInitialUrl` 为可空字符串，取 Profile 当前启动检查地址，供维护表单首次预填；
+用户仍可编辑，POST 的 `initialUrl` 继续独立校验，不自动创建或跳过维护确认。
 目录状态用于展示，不能替代预约事务的实时授权、容量和独占校验。
 
 控制面提供`POST /api/v1/profiles/{id}/maintenance`，请求为`{initialUrl, pageScriptVersionId?}`，

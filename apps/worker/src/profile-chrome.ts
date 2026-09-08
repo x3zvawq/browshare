@@ -2,6 +2,7 @@ import { execFile, fork, type ChildProcess } from 'node:child_process'
 import { chmod, lstat, mkdir, readFile, readlink, readdir, rm, rmdir } from 'node:fs/promises'
 import { hostname } from 'node:os'
 import { promisify } from 'node:util'
+import { fileURLToPath } from 'node:url'
 import { isAbsolute, join } from 'node:path'
 import { Readable, Writable } from 'node:stream'
 
@@ -182,6 +183,15 @@ export class ProfileChromeRuntime {
           '73',
           '--close',
           join(directory, '.browshare-runtime.lock'),
+          // Configure defaults only while holding the Profile lock. exec retains
+          // the Chrome PID/process group and inherited debugging pipe descriptors.
+          '/bin/sh',
+          '-c',
+          '"$1" "$2" "$3" && shift 3 && exec "$@"',
+          'browshare-chrome-fonts',
+          process.execPath,
+          fileURLToPath(new URL('./profile-chrome-fonts.mjs', import.meta.url)),
+          directory,
           config.chromeExecutable,
           '--headless=new',
           '--enable-extensions',

@@ -41482,6 +41482,7 @@
                           "businessStatus",
                           "runtimeState",
                           "runtimeMode",
+                          "defaultInitialUrl",
                           "activeNormalSessions",
                           "blockedReason",
                           "maintenance",
@@ -41722,6 +41723,17 @@
                               "ALWAYS_ON",
                               "ON_DEMAND",
                               "MANUAL"
+                            ]
+                          },
+                          "defaultInitialUrl": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 2048
+                              },
+                              {
+                                "type": "null"
+                              }
                             ]
                           },
                           "activeNormalSessions": {
@@ -42286,6 +42298,7 @@
                     "businessStatus",
                     "runtimeState",
                     "runtimeMode",
+                    "defaultInitialUrl",
                     "activeNormalSessions",
                     "blockedReason",
                     "maintenance",
@@ -42526,6 +42539,17 @@
                         "ALWAYS_ON",
                         "ON_DEMAND",
                         "MANUAL"
+                      ]
+                    },
+                    "defaultInitialUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 2048
+                        },
+                        {
+                          "type": "null"
+                        }
                       ]
                     },
                     "activeNormalSessions": {
