@@ -10,7 +10,7 @@ if [ ! -f "$remote_tab_source/apps/signaling/package.json" ]; then
   exit 1
 fi
 node "$repo_root/tools/check-worker-runtime-compatibility.mjs"
-docker build --platform linux/amd64 \
+docker buildx build --load --platform linux/amd64 \
   --build-context "remote-tab-source=$remote_tab_source" \
   --target gateway \
   --file "$repo_root/deploy/docker/Dockerfile" \

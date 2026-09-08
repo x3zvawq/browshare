@@ -10,7 +10,7 @@ if [ ! -f "$remote_tab_source/packages/viewer/package.json" ]; then
 fi
 node "$repo_root/tools/check-worker-runtime-compatibility.mjs"
 for target in backend migrator gateway portal; do
-  docker build --platform linux/amd64 \
+  docker buildx build --load --platform linux/amd64 \
     --build-context "remote-tab-source=$remote_tab_source" \
     --target "$target" \
     --file "$repo_root/deploy/docker/Dockerfile" \

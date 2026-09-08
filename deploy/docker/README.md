@@ -29,6 +29,8 @@ Remote Tab 默认位于相邻 `../browshare-tab-remote`，其他位置设置
 当前未发布的工作区不能用尚不存在的 Registry 镜像替代本地构建。
 小内存宿主应先按[受限构建器说明](../../docs/RELEASING.md#带-sbom-和来源记录的-oci-候选)
 限制构建并发与内存，并将构建和 Chrome 业务运行分时安排。
+本地构建入口使用 `docker buildx build --load`，将结果显式导入 Docker 镜像库，供后续 Compose
+使用；切换到独立 `docker-container` 构建器时也不能省略该导入步骤。
 
 从 BrowShare 仓库根目录构建控制面镜像，并生成独立的开发配置：
 

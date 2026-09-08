@@ -500,6 +500,18 @@ verify`，限定实际仓库、CI workflow、完整 source SHA、main ref 且拒
 目录别名，使部署者无需访问维护者的 Repository Variables。证据在忽略的 `tmp/hosted-ci-qa/`
 与 Remote Tab 的同名目录；后续提交须核对自己的 CI 结果，不能继承首次提交的成功状态。
 
+### 独立构建器的本地镜像导入（2026-09-08）
+
+公开安装准备发现三个本地构建入口使用未指定输出的 `docker build`，与文档的独立受限
+`docker-container` builder 组合时，构建可成功但镜像仅留在构建缓存，后续 Compose 找不到
+本地标签。Linux Docker 29.8.0 / BuildKit 0.26.2 用极小 scratch/COPY 上下文复现：原命令
+退出成功，`docker image inspect` 仍找不到标签；相同构建器使用 `docker buildx build --load`
+后镜像实际存在。控制面、Worker 和独立 Gateway 入口统一显式加载本地结果，保留相邻源码
+context、平台、target 与 tag 参数。
+
+这是实际构建器与 Docker 本地镜像库的输出边界验证，不代替五类应用镜像构建或新安装业务
+验收。原失败与修复日志保存在忽略的 `tmp/public-source-install-qa/`；已有候选数据卷保留。
+
 ## 可观测性端点与启动日志实测（2026-09-07）
 
 本轮修复Backend请求开始时减去 `Date.now()` 导致累计耗时为负数的问题，改为响应结束时累加Fastify单调耗时，并补齐HTTP状态码和Worker存储指标的Prometheus类型声明。Worker输出最近已完成运行时采样的真实开始时间，HTTP抓取继续复用后台采样，不阻塞控制心跳。
