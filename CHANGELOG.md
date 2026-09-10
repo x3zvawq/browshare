@@ -7,6 +7,11 @@ there is no tagged release or supported previous release yet.
 
 ### Product
 
+- Move normal Viewer route status into the header and size storage columns to their content.
+- Use proportional Noto CJK browser defaults, with separate serif and monospace families.
+- Integrate Remote Tab 0.1.25 native text selection, editing keys, clipboard shortcuts and file
+  drop capabilities through the existing Session transfer policies.
+
 - Profile detail pages with maintenance, Page Script and navigation tabs, shared actions, compact
   refresh status and persistent table column selection.
 - Proxy URL quick entry with local credential parsing and explicit review before saving.
@@ -29,7 +34,7 @@ there is no tagged release or supported previous release yet.
 - Container configuration and healthcheck copies set readable permissions explicitly, allowing
   non-root services to start from source checkouts created with a restrictive umask.
 - Linux amd64; Node 24.12.0; Google Chrome Stable 152.0.7977.75; Remote Tab and signed Extension
-  0.1.24; Worker Control protocol 1.22. Exact pins are in [compatibility.json](deploy/compatibility.json).
+  0.1.25; Worker Control protocol 1.22. Exact pins are in [compatibility.json](deploy/compatibility.json).
 - Database migration journal contains the candidate schema. Historical schema upgrades and current
   image replacement were tested; there is no claim of upgrading from a previously published release.
 - Existing Chrome data is shared within one Profile. Tab ownership does not provide cookie or

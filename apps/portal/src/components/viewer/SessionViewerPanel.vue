@@ -114,8 +114,16 @@ async function retry(generation?: number) {
       <NTag v-if="maintenance" size="small" type="warning">{{ t('maintenance.title') }}</NTag>
       <NTag v-if="session" size="small" :bordered="false">{{
         t(`workspace.sessionState.${session.status}`)
-      }}</NTag
-      ><PreferenceControls /><NButton
+      }}</NTag>
+      <div v-if="session && !isSessionTerminal(session)" class="header-business-status">
+        <StorageBlockNotice
+          :reason="session.storageBlockedReason"
+          :pending="session.storagePolicyPending"
+          compact
+        />
+        <RuntimeRouteStatus :route="session" compact inline />
+      </div>
+      <PreferenceControls /><NButton
         v-if="session && !isSessionTerminal(session)"
         size="small"
         type="error"
@@ -140,12 +148,13 @@ async function retry(generation?: number) {
       }}</NButton>
     </div>
     <div
-      v-if="session && !isSessionTerminal(session)"
-      v-show="
-        !immersive ||
-        !!session.storageBlockedReason ||
-        session.restartRequired ||
-        session.runtimeProxyHealth?.status === 'UNHEALTHY'
+      v-if="
+        immersive &&
+        session &&
+        !isSessionTerminal(session) &&
+        (session.storageBlockedReason ||
+          session.restartRequired ||
+          session.runtimeProxyHealth?.status === 'UNHEALTHY')
       "
       class="business-message"
     >
@@ -268,6 +277,13 @@ async function retry(generation?: number) {
   color: var(--bs-primary);
   text-decoration: none;
   font-size: 13px;
+}
+.header-business-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
 }
 .session-heading {
   flex: 1;

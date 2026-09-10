@@ -95,7 +95,6 @@ const columns = computed<DataTableColumns<ManagedWorker>>(() => [
   {
     key: 'storage',
     title: t('storage.title'),
-    width: 280,
     render: (w) =>
       h(StoragePolicySummary, {
         quotaBytes: w.storageQuotaBytes,
@@ -155,7 +154,7 @@ const columns = computed<DataTableColumns<ManagedWorker>>(() => [
       :columns="columns"
       :data="items"
       :row-key="(w: ManagedWorker) => w.id"
-      :scroll-x="1490"
+      scroll-x="max-content"
       :single-line="false"
     />
     <NButton v-if="nextCursor" :loading="loading" @click="more">{{

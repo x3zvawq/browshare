@@ -307,7 +307,6 @@ const allColumns = computed<DataTableColumns<Profile>>(() => {
     {
       title: t('storage.title'),
       key: 'storage',
-      width: 280,
       render: (profile) => h(ProfileStorageStatus, { profile, compact: true }),
     },
     {
@@ -348,9 +347,6 @@ const columns = computed(() =>
         column.key === 'actions' ||
         selectedColumns.value.includes(String(column.key))),
   ),
-)
-const scrollWidth = computed(() =>
-  columns.value.reduce((total, column) => total + Number(column.width ?? 180), 0),
 )
 const columnOptions = computed(() =>
   allColumns.value.flatMap((column) =>
@@ -436,7 +432,7 @@ function capacityProgressStatus(
       :data="tableData"
       :loading="loading"
       :row-key="(profile: Profile) => profile.id"
-      :scroll-x="scrollWidth"
+      scroll-x="max-content"
       striped
     >
       <template #empty>

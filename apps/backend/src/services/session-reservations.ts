@@ -288,9 +288,16 @@ export class SessionReservationService {
         'backForward',
         'reload',
         ...(transferSettings.uploadEnabled ? ['upload'] : []),
+        ...(transferSettings.uploadEnabled && supportedCapabilities.includes('fileDrop')
+          ? ['fileDrop']
+          : []),
         ...(transferSettings.downloadEnabled ? ['download'] : []),
         ...(transferSettings.clipboardTextEnabled ? ['clipboardText'] : []),
         ...(transferSettings.clipboardImageEnabled ? ['clipboardImage'] : []),
+        ...((transferSettings.clipboardTextEnabled || transferSettings.clipboardImageEnabled) &&
+        supportedCapabilities.includes('clipboardSelection')
+          ? ['clipboardSelection']
+          : []),
         'localOpen',
         'noticeRequests',
         'navigationConfirmation',

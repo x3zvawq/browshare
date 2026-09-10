@@ -888,3 +888,14 @@ Worker Control 的消息结构没有变化，版本仍为 1.22。Remote Tab 在�
 
 指针只反映当前可操作窗口的标准 CSS 指针形状，不携带页面文本、输入值或自定义指针资源
 URL。视频画面、输入授权、窗口切换和 viewport 确认仍由 Remote Tab 的既有边界负责。
+
+## 原生拖入与选区剪贴板（Remote Tab 0.1.25）
+
+Backend仅在上传开关开启且Worker报告`fileDrop`时授权原生文件拖入；仅在文字或图片剪贴板
+开关开启且Worker报告`clipboardSelection`时授权选区复制/剪切。能力随Session预约快照、
+Viewer票据和Worker请求传递，沿用Control 1.22的能力数组。Remote Tab wire 1.6负责协商、
+文件传输及原生Chrome输入，BrowShare不实现第二套拖放协议。
+
+文件拖入复用现有上传大小、类型、数量、总量和临时文件生命周期限制。目标坐标属于已确认
+窗口和viewport，文档导航、切窗或撤销后不得把迟到文件投递给新的目标。复制/剪切沿用剪贴板
+能力及策略检查，浏览器拒绝本机剪贴板访问时保留明确反馈和手动操作入口。

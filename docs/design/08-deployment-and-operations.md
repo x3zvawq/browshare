@@ -168,14 +168,16 @@ Chrome HTTP管理入口。Worker给Remote Core提供每Runtime随机秘密路径
 拒绝所有携带Origin的连接，普通HTTP始终404；不得将该私有地址配置到反向代理、Portal或日志中。
 既有Profile升级时无需迁移用户数据，原TCP CDP端口文件在新Chrome取得锁后清理。
 
-Worker镜像固定安装Maple Mono CN v7.9的Regular、Bold、Italic和Bold Italic，下载包校验SHA-256，
-并保留上游OFL 1.1许可。每次启动Chrome前，在同一Profile的flock锁内原子合并
-`Default/Preferences`的`webkit.webprefs.fonts`，把standard、serif、sansserif、fixed的
-Zyyy、Hans、Hant默认族设为`Maple Mono CN`。其他偏好、Cookie及站点存储不变；运行中的Chrome
+Worker镜像安装Debian的`fonts-noto-cjk`包，保留`/usr/share/doc/fonts-noto-cjk/copyright`中的
+上游OFL 1.1许可。每次启动Chrome前，在同一Profile的flock锁内原子合并
+`Default/Preferences`的`webkit.webprefs.fonts`：standard和sansserif使用比例字体
+`Noto Sans CJK SC`，serif使用`Noto Serif CJK SC`，fixed使用`Noto Sans Mono CJK SC`，
+同时设置Zyyy、Hans、Hant脚本。其他偏好、Cookie及站点存储不变；运行中的Chrome
 不修改，升级对该Profile下次启动生效。网站显式字体及`@font-face`保持优先，不注入页面CSS。
 字体支持简体、繁体中文和日文，但不保证所有Unicode字符。镜像之外部署Worker时，先安装
-fontconfig、curl和unzip，再以root运行`bash deploy/docker/install-maple-font.sh`，并将
-`deploy/docker/50-maple-mono.conf`以0644安装到`/etc/fonts/conf.d/50-maple-mono.conf`。
+fontconfig和fonts-noto-cjk，并将`deploy/docker/50-browshare-fonts.conf`以0644安装到
+`/etc/fonts/conf.d/50-browshare-fonts.conf`。从旧版手工安装升级时移除旧的
+`/etc/fonts/conf.d/50-maple-mono.conf`，避免冲突。不将macOS的苹方字体复制进Linux镜像。
 
 Chrome sandbox需要随镜像发布的
 最小seccomp profile；`seccomp=unconfined`只允许在隔离测试中定位宿主兼容性，不能进入生产Compose。
