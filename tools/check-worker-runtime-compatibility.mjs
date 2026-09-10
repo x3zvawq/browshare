@@ -67,6 +67,13 @@ const configuration = await readFile(
   new URL('../apps/worker/src/configuration.ts', import.meta.url),
   'utf8',
 )
+const runtime = await readFile(
+  new URL('../apps/worker/src/remote-tab-runtime.ts', import.meta.url),
+  'utf8',
+)
+if (!runtime.includes(`core.REMOTE_TAB_CORE_VERSION !== '${manifest.remoteTab.releaseVersion}'`)) {
+  failures.push('Worker runtime package guard must match the coordinated Remote Tab release')
+}
 for (const [name, value] of [
   ['Chrome runtime default', manifest.chrome.product.replace('Chrome/', '')],
   ['Remote Tab release default', manifest.remoteTab.releaseVersion],
